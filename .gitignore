@@ -1,8 +1,11 @@
-node_modules
-/node_modules
-/build
-/src/jsons/*.json
-/*.log
-*.lock
+/client/node_modules
+/client/build
+/client/src/components/canvas/jsons/*.json
+/client/src/jsons/*.json
+/client/*.log
+/client/*.lock
 
-package-lock.json
+/lambda/node_modules
+/lambda/build
+/lambda/credentials
+/lambda/source
