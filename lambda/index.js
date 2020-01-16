@@ -3,10 +3,9 @@ const vision = require("@google-cloud/vision");
 
 // Creates a client
 const client = new vision.ImageAnnotatorClient({
-  keyFilename: "./credentials/explorertank-fc8780978b83.json"
+  keyFilename: "./credentials/service_account.json"
 });
 
-//SA key: fc8780978b83bc3435c4da261469f74a2767eaab
 /**
  * TODO(developer): Uncomment the following line before running the sample.
  */
