@@ -4,12 +4,15 @@ import testData from "./jsons/1.json"
 
 const Canvas = (props) => {
 
-	const canvasRef = useRef(null);
-
+	const canvasRef = useRef(null); 
 	let [isTrackingMouse, setIsTrackingMouse] = useState(false);
-	const [drawnLines, setDrawnLines]           = useState([]);
+	const [drawnLines, setDrawnLines]           = useState({});
 	const [currentLine, setCurrentLine]         = useState([]);
 	const [lineHighlight, setLineHighlight]     = useState(null);
+	const [detectedBlocksGroup, setDetectedBlockGroup] = useState({});
+	const [googleVAPIResponse, setGoogleVAPIResponse] = useState([]);
+
+	const detectTrackedBlocks = () => {}
 
 	const onCanvasMouseDown = (e) => {
 		const mouseCoord = getMouseCoord(e, canvasRef.current)
@@ -28,9 +31,17 @@ const Canvas = (props) => {
 		setCurrentLine(currentLine)
 		console.log("moving")
 		drawLine(currentLine, props.lineHighlight, canvasRef.current)
+		if (currentLine.length % 5 === 0) {
+			// detect blocks the line has crossed, save the ids
+			const detectedBlocks = 
+		}
 	}
 
 	const onCanvasMouseUp = (e) => {
+		if (!props.lineHighlight) {	
+			console.log("line heih
+			return;
+		}
 		drawnLines.push({
 			name: props.lineHighlight,
 			color: props.lineColor,
@@ -42,10 +53,16 @@ const Canvas = (props) => {
 		setIsTrackingMouse(isTrackingMouse);
 	}
 
+	/*
+	  Receive the image from parent, 
+		push the image into lambda function, get the raw google vision api result
+
+	*/
 	const loadData = async () => {
 		//let data = await fetch("http://127.0.0.1:8080/jsons/4.json");
 		//data = await data.json();
 		//return data;
+		setGoogleVAPIResponse(testData);
 	}
 
 	const addEventListenerCanvas = () => {

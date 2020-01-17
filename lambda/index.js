@@ -36,3 +36,13 @@ const fileName = `./source/${imageName}.jpg`;
     });
   });
 })();
+
+export const handler = (event, ctx) => {
+
+	console.log("the handler was created");
+
+	return {
+		status: 201
+	}
+
+}
