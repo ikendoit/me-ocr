@@ -6,6 +6,7 @@
 */
 export const drawLine = (currentLine, lineHighlight, canvasRefObj) => {
   const ctx = canvasRefObj.getContext('2d');
+	console.log("drawing line");
   ctx.globalAlpha = 0.5;
 	ctx.lineWidth = "10";
 	ctx.strokeStyle = 'rgba(0,0,0,0.7)';
@@ -30,22 +31,23 @@ export const drawLine = (currentLine, lineHighlight, canvasRefObj) => {
 */
 export const drawWordBlocks = (simplifiedGoogleVAPI, canvasRefObj) => {
   const ctx = canvasRefObj.getContext('2d');
-  const hostWidth = canvasRef.width;
-  const hostHeight = canvasRef.height;
+  const hostWidth = canvasRefObj.width;
+  const hostHeight = canvasRefObj.height;
 
   for (let paragraph of simplifiedGoogleVAPI) {
-    for (let word of simplifiedGoogleVAPI) {
+    for (let word of paragraph.words) {
 
       const {X, Y, W, H} = canvasCoordFromWordCoord(word.wordCoordinate, hostWidth, hostHeight);
+			console.log("drawing things", X, Y, W, H, word.value);
       ctx.beginPath();
       ctx.lineWidth = "1";
       ctx.strokeStyle = "red";
-      ctx.strokeOpacity = 0.1;
+      ctx.strokeOpacity = 1;
       ctx.rect(X, Y, W, H);
       ctx.stroke();
 
       ctx.font = "30px bold";
-      ctx.fillText(symbol.text, X, Y + 25);
+      ctx.fillText(word.value, X, Y + 25);
     }
   }
 
@@ -56,7 +58,6 @@ export const drawWordBlocks = (simplifiedGoogleVAPI, canvasRefObj) => {
   return [x,y]
 */
 export const getMouseCoord = (e, canvasRefObj) => {
-  console.log(canvasRefObj.offsetLeft);
 	let offsetX = canvasRefObj.offsetLeft,
 		offsetY = canvasRefObj.offsetTop;
 
@@ -78,9 +79,9 @@ export const getMouseCoord = (e, canvasRefObj) => {
 const canvasCoordFromWordCoord = (wordCoord, hostWidth, hostHeight) => {
   return {
     // TODO: check if this ratio will wokr
-    X: wordCoord[0][0] * hostWidth / 1000,
-    Y: wordCoord[0][1] * hostHeight / 1000,
-    W: (wordCoord[2][0] - wordCoord[0][0]) * hostWidth / 1000,
-    H: (wordCoord[2][1] - wordCoord[0][1]) * hostHeight / 1000
+    X: wordCoord[0][0],// * hostWidth / 1000,
+    Y: wordCoord[0][1],// * hostHeight / 1000,
+    W: (wordCoord[2][0] - wordCoord[0][0]),// * hostWidth / 1000,
+    H: (wordCoord[2][1] - wordCoord[0][1]),// * hostHeight / 1000
   }
 }

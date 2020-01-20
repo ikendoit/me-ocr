@@ -38,7 +38,8 @@
     "jsts": "^2.1.0",
     "preact": "^10.0.1",
     "preact-render-to-string": "^5.1.0",
-    "preact-router": "^3.0.0"
+    "preact-router": "^3.0.0",
+    "react-hot-loader": "^4.12.18"
   },
   "jest": {
     "preset": "jest-preset-preact",

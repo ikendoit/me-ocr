@@ -18,3 +18,5 @@ const ModeSelection = (props) => {
 	)
 	
 }
+
+export default ModeSelection

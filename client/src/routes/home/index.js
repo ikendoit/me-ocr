@@ -4,8 +4,8 @@ import { input, Upload, message, Button, Icon  } from 'antd';
 import style from './style';
 import Canvas from '../../components/canvas'
 import ModeSelection from '../../components/mode-selection'
-import { simplifyGoogleVAPI } from "../src/utils/data-tools"
-import testData from "../jsons/1.json"
+import { simplifyGoogleVAPI } from "../../utils/data-tools"
+import testData from "../../jsons/1.json"
 
 const Home = (props) => {
 
@@ -48,11 +48,8 @@ const Home = (props) => {
         imageFile={uploadedFile}
         lineHighlight={null}
         lineColor={null}
-				googleVAPIResponse={googleVAPIResponse}
 				rawOcrResult={rawOcrResult}
       />
-
-      <p>This is the Home component.</p>
 
     </div>
   )

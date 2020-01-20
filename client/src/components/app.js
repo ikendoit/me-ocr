@@ -1,3 +1,4 @@
+import { hot } from 'react-hot-loader/babel';
 import { h, Component } from 'preact';
 import { Router } from 'preact-router';
 

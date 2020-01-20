@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from "preact/hooks"
 import { drawLine, drawWordBlocks, getMouseCoord } from "./drawer-utils"
+import { detectOverlapBlocks } from "../../utils/canvas-tools"
 
 const Canvas = (props) => {
 
@@ -7,7 +8,6 @@ const Canvas = (props) => {
 	let [isTrackingMouse, setIsTrackingMouse] = useState(false);
 	const [drawnLines, setDrawnLines]           = useState({});
 	const [currentLine, setCurrentLine]         = useState([]);
-	const [lineHighlight, setLineHighlight]     = useState(null);
 	const [detectedBlocksGroup, setDetectedBlockGroup] = useState({});
 
 	const detectTrackedBlocks = () => {}
@@ -28,11 +28,13 @@ const Canvas = (props) => {
 		drawLine(currentLine, props.lineHighlight, canvasRef.current)
 		if (currentLine.length % 5 === 0) {
 			// detect blocks the line has crossed, save the ids
-			const detectedBlocks =32323323232
+			const detectedBlocks = detectOverlapBlocks(props.rawOcrResult, currentLine);
+			console.log("detected: ", detectedBlocks);
 		}
 	}
 
 	const onCanvasMouseUp = (e) => {
+		isTrackingMouse = false;
 		if (!props.lineHighlight) {	
 			return;
 		}
@@ -42,9 +44,9 @@ const Canvas = (props) => {
 			data: [...currentLine]
 		})
 		setCurrentLine([])
-		isTrackingMouse = false;
 		setIsTrackingMouse(isTrackingMouse);
 	}
+
 	const addEventListenerCanvas = () => {
 		canvasRef.current.onmousedown = onCanvasMouseDown
 		canvasRef.current.onmousemove = onCanvasMouseMove
@@ -78,6 +80,11 @@ const Canvas = (props) => {
     // this is to read the file
    	reader.readAsDataURL(file);
 		addEventListenerCanvas()
+		if (props.rawOcrResult.length > 0) {
+      console.log("drawing words blocks on image");
+			loadWordBlocksOnCanvas();
+		}
+    setDetectedBlockGroup([]);
 	}
 
 	/*
@@ -92,16 +99,19 @@ const Canvas = (props) => {
 
 		if (!canvasRef.current) return;
 		const ctx = canvasRef.current.getContext('2d');
-		ctx.clear();
+
+		ctx.clearRect(0,0,canvasRef.width, canvasRef.height);
 		
 		if (props.imageFile) {
 			loadImageOnCanvas()
 		}
-		if (props.rawOcrResult) {
-			loadWordBlocksOnCanvas();
-		}
-
 	} , [canvasRef.current, props.imageFile, props.rawOcrResult])
+
+  if (canvasRef.current && props.rawOcrResult.length > 0) {
+		const ctx = canvasRef.current.getContext('2d');
+    loadWordBlocksOnCanvas();
+  }
+
 
 	return (
 		<div>
@@ -111,7 +121,7 @@ const Canvas = (props) => {
 				width="1000px"
 				ref={canvasRef}
 				style={{
-					border: '1px solid #d3d3d3'
+					border: '1px solid #d3d3d3',
 				}}
 			>
 				Your browser does not support the HTML5 canvas tag.
