@@ -6,7 +6,6 @@
 */
 export const drawLine = (currentLine, lineHighlight, canvasRefObj) => {
   const ctx = canvasRefObj.getContext('2d');
-	console.log("drawing line");
   ctx.globalAlpha = 0.5;
 	ctx.lineWidth = "10";
 	ctx.strokeStyle = 'rgba(0,0,0,0.7)';
@@ -36,9 +35,7 @@ export const drawWordBlocks = (simplifiedGoogleVAPI, canvasRefObj) => {
 
   for (let paragraph of simplifiedGoogleVAPI) {
     for (let word of paragraph.words) {
-
-      const {X, Y, W, H} = canvasCoordFromWordCoord(word.wordCoordinate, hostWidth, hostHeight);
-			console.log("drawing things", X, Y, W, H, word.value);
+      const {X, Y, W, H} = canvasCoordFromWordCoord(word.wordCoordinate);
       ctx.beginPath();
       ctx.lineWidth = "1";
       ctx.strokeStyle = "red";
@@ -50,7 +47,6 @@ export const drawWordBlocks = (simplifiedGoogleVAPI, canvasRefObj) => {
       ctx.fillText(word.value, X, Y + 25);
     }
   }
-
 }
 
 /*
@@ -76,12 +72,12 @@ export const getMouseCoord = (e, canvasRefObj) => {
     H
   } - renderable rectangle for canvas
 */
-const canvasCoordFromWordCoord = (wordCoord, hostWidth, hostHeight) => {
+const canvasCoordFromWordCoord = (wordCoord) => {
   return {
     // TODO: check if this ratio will wokr
-    X: wordCoord[0][0],// * hostWidth / 1000,
-    Y: wordCoord[0][1],// * hostHeight / 1000,
-    W: (wordCoord[2][0] - wordCoord[0][0]),// * hostWidth / 1000,
-    H: (wordCoord[2][1] - wordCoord[0][1]),// * hostHeight / 1000
+    X: wordCoord[0][0],
+    Y: wordCoord[0][1],
+    W: (wordCoord[2][0] - wordCoord[0][0]),
+    H: (wordCoord[2][1] - wordCoord[0][1]),
   }
 }

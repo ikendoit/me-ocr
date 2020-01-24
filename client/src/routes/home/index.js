@@ -46,8 +46,7 @@ const Home = (props) => {
 
       <Canvas 
         imageFile={uploadedFile}
-        lineHighlight={null}
-        lineColor={null}
+        lineHighlight={currentMode}
 				rawOcrResult={rawOcrResult}
       />
 

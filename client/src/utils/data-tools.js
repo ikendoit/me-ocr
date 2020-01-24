@@ -58,3 +58,31 @@ const convertVerticesTo2DPolygon = (vertices) => {
   return rawArray
 
 }
+
+/*
+	param: wordBlockGroups: {
+		<group_name>: [
+			coordinate: [ [x,y] x 4 ]
+			value
+		] 
+	} 
+	- array elements may repeat
+	mutate that object into: {
+		<group_name>: [
+			coordinate: [ [x,y] x 4 ]
+			value
+		]
+	}
+	- array elements are unique
+*/
+export const uniqifyWordBlockObject = (wordBlockGroups) => {
+	for (let key in wordBlockGroups) {
+		const elements = wordBlockGroups[key]
+		const uniqDict = elements.reduce( (master, ele) => {
+			master[`${ele.wordCoordinate[0][0]}-${ele.wordCoordinate[0][1]}`] = ele;
+			return master;
+		}, {});
+		const uniqArray = Object.values(uniqDict);
+		wordBlockGroups[key] = uniqArray;
+	}
+}

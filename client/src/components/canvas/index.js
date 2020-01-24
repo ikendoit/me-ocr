@@ -1,16 +1,15 @@
 import { useRef, useEffect, useState } from "preact/hooks"
 import { drawLine, drawWordBlocks, getMouseCoord } from "./drawer-utils"
 import { detectOverlapBlocks } from "../../utils/canvas-tools"
+import { uniqifyWordBlockObject } from "../../utils/data-tools"
 
 const Canvas = (props) => {
 
 	const canvasRef = useRef(null); 
 	let [isTrackingMouse, setIsTrackingMouse] = useState(false);
-	const [drawnLines, setDrawnLines]           = useState({});
+	const [drawnLines, setDrawnLines]           = useState([]);
 	const [currentLine, setCurrentLine]         = useState([]);
 	const [detectedBlocksGroup, setDetectedBlockGroup] = useState({});
-
-	const detectTrackedBlocks = () => {}
 
 	const onCanvasMouseDown = (e) => {
 		const mouseCoord = getMouseCoord(e, canvasRef.current)
@@ -26,10 +25,17 @@ const Canvas = (props) => {
 		currentLine.push(mouseCoord);
 		setCurrentLine(currentLine)
 		drawLine(currentLine, props.lineHighlight, canvasRef.current)
+
+		// for every 5 points detected with mouse, perform tracking of crossed blocks
 		if (currentLine.length % 5 === 0) {
+
 			// detect blocks the line has crossed, save the ids
 			const detectedBlocks = detectOverlapBlocks(props.rawOcrResult, currentLine);
-			console.log("detected: ", detectedBlocks);
+			// init array if not already
+			if (!detectedBlocksGroup[props.lineHighlight]) detectedBlocksGroup[props.lineHighlight] = [];
+			// add the detected Blocks into group
+			detectedBlocksGroup[props.lineHighlight] = detectedBlocksGroup[props.lineHighlight].concat(detectedBlocks);
+
 		}
 	}
 
@@ -40,11 +46,12 @@ const Canvas = (props) => {
 		}
 		drawnLines.push({
 			name: props.lineHighlight,
-			color: props.lineColor,
 			data: [...currentLine]
 		})
 		setCurrentLine([])
 		setIsTrackingMouse(isTrackingMouse);
+		uniqifyWordBlockObject(detectedBlocksGroup)
+		console.log(detectedBlocksGroup);
 	}
 
 	const addEventListenerCanvas = () => {
@@ -80,10 +87,6 @@ const Canvas = (props) => {
     // this is to read the file
    	reader.readAsDataURL(file);
 		addEventListenerCanvas()
-		if (props.rawOcrResult.length > 0) {
-      console.log("drawing words blocks on image");
-			loadWordBlocksOnCanvas();
-		}
     setDetectedBlockGroup([]);
 	}
 
@@ -98,21 +101,20 @@ const Canvas = (props) => {
 	useEffect( () => {
 
 		if (!canvasRef.current) return;
-		const ctx = canvasRef.current.getContext('2d');
-
-		ctx.clearRect(0,0,canvasRef.width, canvasRef.height);
-		
 		if (props.imageFile) {
+			const ctx = canvasRef.current.getContext('2d');
+			ctx.clearRect(0,0,canvasRef.width, canvasRef.height);
 			loadImageOnCanvas()
 		}
+
 	} , [canvasRef.current, props.imageFile, props.rawOcrResult])
 
-  if (canvasRef.current && props.rawOcrResult.length > 0) {
-		const ctx = canvasRef.current.getContext('2d');
-    loadWordBlocksOnCanvas();
-  }
+	if (canvasRef.current && props.rawOcrResult.length > 0) {
+		addEventListenerCanvas();
+		loadWordBlocksOnCanvas();
+	}
 
-
+	console.log('rendering: ',detectedBlocksGroup);
 	return (
 		<div>
 			<canvas
