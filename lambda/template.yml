@@ -1,14 +1,27 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: >
-  me-ocr-google-vision-api
-
+Description: |
+  me-ocr-google-vision-api |
   SAM Template for me-ocr lambda function 
   
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 120
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,OPTIONS'"
+      AllowHeaders: "'content-type,Content-Type'"
+      AllowOrigin: "'http://localhost:8080,http://127.0.0.1:8080'"
+      AllowCredentials: "'*'"
+    BinaryMediaTypes:
+      # These are equivalent to image/gif and image/png when deployed
+      - image~1gif
+      - image~1png
+      - image~1jpg
+      - image~1jpeg
+      - application~1octet-stream
+      - application/octet-stream
 
 Resources:
   GoogleVisionFunction:
@@ -23,17 +36,27 @@ Resources:
           Properties:
             Path: /read
             Method: post
+          BinaryMediaTypes:
+            # These are equivalent to image/gif and image/png when deployed
+            - image~1gif
+            - image~1png
+            - image~1jpg
+            - image~1jpeg
+            - application~1octet-stream
+            - application/octet-stream
 
-Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  MeOcrGoogleVisionAPI:
-    Description: "API Gateway endpoint URL for Prod stage for Me Ocr Google Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read/"
-  GoogleVisionFunction:
-    Description: "Lambda Function ARN"
-    Value: !GetAtt GoogleVisionFunction.Arn
-  GoogleVisionFunctionIamRole:
-    Description: "Implicit IAM Role created for The Me OCR Google Vision api"
-    Value: !GetAtt GoogleVisionFunctionRole.Arn
+
+
+#Outputs:
+#  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+#  # Find out more about other implicit resources you can reference within SAM
+#  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+#  MeOcrGoogleVisionAPI:
+#    Description: "API Gateway endpoint URL for Prod stage for Me Ocr Google Function"
+#    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/read/"
+#  GoogleVisionFunction:
+#    Description: "Lambda Function ARN"
+#    Value: !GetAtt GoogleVisionFunction.Arn
+#  GoogleVisionFunctionIamRole:
+#    Description: "Implicit IAM Role created for The Me OCR Google Vision api"
+#    Value: !GetAtt GoogleVisionFunctionRole.Arn

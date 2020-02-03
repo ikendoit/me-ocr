@@ -86,3 +86,9 @@ export const uniqifyWordBlockObject = (wordBlockGroups) => {
 		wordBlockGroups[key] = uniqArray;
 	}
 }
+
+export const autoConvertGoogleVAPIToTable = (visionAPIContent) => {
+
+	console.log("testing auto conversion");
+
+}

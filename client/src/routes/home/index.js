@@ -5,7 +5,7 @@ import style from './style';
 import Canvas from '../../components/canvas'
 import ModeSelection from '../../components/mode-selection'
 import { simplifyGoogleVAPI } from "../../utils/data-tools"
-import testData from "../../jsons/1.json"
+import testData from "../../jsons/8.json"
 
 const Home = (props) => {
 
@@ -17,6 +17,7 @@ const Home = (props) => {
     const file = event.target.files[0];
     // TODO: perform validation for img file validity HERE
     setUploadedFile(file);
+		console.log("performing the file loader");
 		loadGoogleVAPI(file);
   }
 
@@ -24,13 +25,22 @@ const Home = (props) => {
 	  Receive the image File,
 		push the image into lambda function, get the raw google vision api result
 	*/
-	const loadGoogleVAPI = (file) => {
-		//let data = await fetch("http://127.0.0.1:8080/jsons/4.json");
-		//data = await data.json();
-		//return data;
-		const fetchResult = testData;
-		const simplified = simplifyGoogleVAPI(fetchResult);
-		setRawOcrResult(simplified);
+	const loadGoogleVAPI = async (file) => {
+	  const formData  = new FormData();
+
+		console.log("checking the ", file);
+
+		formData.append("image", file);
+		let data = await fetch("http://localhost:8001/read", {
+			method: "POST",
+			mode: 'no-cors',
+			body: formData
+		});
+		data = await data.json();
+		return data;
+		//const fetchResult = testData;
+		//const simplified = simplifyGoogleVAPI(fetchResult);
+		//setRawOcrResult(simplified);
 	}
 
   return (
