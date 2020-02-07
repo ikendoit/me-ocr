@@ -2,6 +2,7 @@
 
 const vision = require("@google-cloud/vision");
 const parser = require("aws-lambda-multipart-parser");
+const fs = require("fs");
 
 // Creates a client
 const client = new vision.ImageAnnotatorClient({
@@ -20,9 +21,11 @@ exports.handler = async (event, ctx, callback) => {
 		console.log("received request");
     console.log(event)
 
+		fs.writeFileSync("./run.txt", "this was run at " + new Date().getTime());
+
 		callback(null, {
 			statusCode: 200,
-			body: { x: "['hello world body']" }
+			body: "hello world"
 		});
 		// Read a local image as a text document
 		//const [result] = await client.documentTextDetection(fileName, { imageContext: { "languageHints": ["vi-t-i0-handwrit"] } });

@@ -10,7 +10,7 @@ const test1 = async () => {
 
 	let data = await fetch("http://localhost:8001/read", {
 		method: "POST",
-		mode: 'no-cors',
+		//mode: 'no-cors',
 		headers: {
 			"Content-Type": "application/octet-stream"
 		},

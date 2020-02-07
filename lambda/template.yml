@@ -21,7 +21,6 @@ Globals:
       - image~1jpg
       - image~1jpeg
       - application~1octet-stream
-      - application/octet-stream
 
 Resources:
   GoogleVisionFunction:
@@ -36,16 +35,6 @@ Resources:
           Properties:
             Path: /read
             Method: post
-          BinaryMediaTypes:
-            # These are equivalent to image/gif and image/png when deployed
-            - image~1gif
-            - image~1png
-            - image~1jpg
-            - image~1jpeg
-            - application~1octet-stream
-            - application/octet-stream
-
-
 
 #Outputs:
 #  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
