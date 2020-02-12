@@ -4,61 +4,74 @@ const vision = require("@google-cloud/vision");
 const parser = require("aws-lambda-multipart-parser");
 const fs = require("fs");
 
+// S3
+// Load the AWS SDK for Node.js
+const AWS = require('aws-sdk');
+// Load credentials and set Region from JSON file
+AWS.config.loadFromPath('./credentials/aws-config.json');
+const s3 = new AWS.S3({apiVersion: '2006-03-01'})
+
+// GCP - Cloud Vision
 // Creates a client
 const client = new vision.ImageAnnotatorClient({
 	keyFilename: "./credentials/service_account.json"
 });
 
-/**
- * TODO(developer): Uncomment the following line before running the sample.
- */
-const imageName = "4"
-const fileName = `./source/${imageName}.jpg`;
+const headersApi = {
+	"Access-Control-Allow-Headers": 
+			"Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token",
+	"Access-Control-Allow-Methods": "HEAD,OPTIONS,POST",
+	"Access-Control-Allow-Origin": "*",
+}
 
+// MAIN
 exports.handler = async (event, ctx, callback) => {
 
 	try {
-		console.log("received request");
-    console.log(event)
+		const body = JSON.parse(event.body);
 
-		fs.writeFileSync("./run.txt", "this was run at " + new Date().getTime());
+		// check request validity
+		if (!body.Bucket || !body.S3Path) {
+			callback(null, {
+				statusCoce: 400,
+				headers: headersApi,
+				body: "Invalid S3 Path"
+			});
+			return;
+		}
 
+		// download file to local storage
+		const fileName = `/tmp/${body.S3Path.replace(/\//g,'_')}`
+		const data = await s3.getObject({
+			Bucket: body.Bucket,
+			Key: body.S3Path
+		}).promise(); 
+
+		fs.writeFileSync(fileName, data.Body);
+		console.log("writing to file: ", fileName);
+
+		// run vision api on downloaded file
+	  const [result] = await client.documentTextDetection(fileName, { imageContext: { "languageHints": ["vi-t-i0-handwrit"] } });
+		const fullTextAnnotation = result.fullTextAnnotation;
+				//fs.writeFileSync(`./${imageName}.json`, JSON.stringify(fullTextAnnotation, null, 2))
+
+		console.log(fullTextAnnotation);
+
+		// response to client 
 		callback(null, {
 			statusCode: 200,
-			body: "hello world"
-		});
-		// Read a local image as a text document
-		//const [result] = await client.documentTextDetection(fileName, { imageContext: { "languageHints": ["vi-t-i0-handwrit"] } });
-		//const fullTextAnnotation = result.fullTextAnnotation;
-		//require("fs").writeFileSync(`./${imageName}.json`, JSON.stringify(fullTextAnnotation, null, 2))
-		//callback(null, {
-		//	statusCode: 200,
-		//	body: fullTextAnnotation
-		//})
+			headers: headersApi,
+			body: fullTextAnnotation
+		})
+
+		return fullTextAnnotation;
+
 	} catch(err) {
 		console.log(err);
 		callback(null, {
 			code: 400, 
-			body: "Error parsing, please fix."
+			headers: headersApi,
+			body: err.toString()
 		});
 	}
-	//console.log(`Full text: ${fullTextAnnotation.text}`);
-	//fullTextAnnotation.pages.forEach(page => {
-	//	page.blocks.forEach(block => {
-	//		console.log(`Block confidence: ${block.confidence}`);
-	//		block.paragraphs.forEach(paragraph => {
-	//			console.log(`Paragraph confidence: ${paragraph.confidence}`);
-	//			paragraph.words.forEach(word => {
-	//				const wordText = word.symbols.map(s => s.text).join("");
-	//				console.log(`Word text: ${wordText}`);
-	//				console.log(`Word confidence: ${word.confidence}`);
-	//				word.symbols.forEach(symbol => {
-	//					console.log(`Symbol text: ${symbol.text}`);
-	//					console.log(`Symbol confidence: ${symbol.confidence}`);
-	//				});
-	//			});
-	//		});
-	//	});
-	//});
-
 }

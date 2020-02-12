@@ -23,21 +23,44 @@ const Home = (props) => {
 
 	/*
 	  Receive the image File,
-		push the image into lambda function, get the raw google vision api result
+		push the image into s3 and lambda function, 
+		@return the simplified google vision api result
 	*/
 	const loadGoogleVAPI = async (file) => {
-	  const formData  = new FormData();
 
-		console.log("checking the ", file);
+		// variables
+		const bucket = 'samson-ocr';
+		const timeStamp = new Date().getTime();
+		const datetime = (new Date()).toISOString().slice(0,10);
+		const randomNumber = parseInt(Math.random()*18081).toString(); // random number prefix for epoch to ensure there's no collision when lambda reads from s3
 
-		formData.append("image", file);
-		let data = await fetch("http://localhost:8001/read", {
+		// save to s3 bucket
+		let url = `http://samson-ocr.s3.amazonaws.com/${datetime}/${randomNumber}${timeStamp}`;
+		//const s3Upload = await fetch(url, {
+		//	method: "PUT",
+		//	headers: {
+		//		"x-amz-acl": "bucket-owner-full-control"
+		//	},
+		//	body: file
+		//});
+		const fakePath = "2020-02-10/9551581300905669"
+
+		// parse s3 files
+		let response = await fetch("http://localhost:8001/read", {
 			method: "POST",
-			mode: 'no-cors',
-			body: formData
+			body: JSON.stringify({
+				Bucket: bucket,
+				S3Path: fakePath, //`${datetime}/${randomNumber}${timeStamp}`
+			})
 		});
-		data = await data.json();
-		return data;
+		let data = await response.json()
+		console.log(data);
+		//let parsableData = simplifyGoogleVAPI(data)
+
+		//console.log(parsableData);
+		//setRawOcrResult(parsableData);
+		//return parsableData;
+
 		//const fetchResult = testData;
 		//const simplified = simplifyGoogleVAPI(fetchResult);
 		//setRawOcrResult(simplified);
