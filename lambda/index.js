@@ -55,7 +55,7 @@ exports.handler = async (event, ctx, callback) => {
 		const fullTextAnnotation = result.fullTextAnnotation;
 				//fs.writeFileSync(`./${imageName}.json`, JSON.stringify(fullTextAnnotation, null, 2))
 
-		console.log(fullTextAnnotation);
+		console.log(JSON.stringify(fullTextAnnotation, null, 2));
 
 		// response to client 
 		callback(null, {

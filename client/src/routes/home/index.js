@@ -28,42 +28,50 @@ const Home = (props) => {
 	*/
 	const loadGoogleVAPI = async (file) => {
 
-		// variables
-		const bucket = 'samson-ocr';
-		const timeStamp = new Date().getTime();
-		const datetime = (new Date()).toISOString().slice(0,10);
-		const randomNumber = parseInt(Math.random()*18081).toString(); // random number prefix for epoch to ensure there's no collision when lambda reads from s3
+		/*
+		  // variables
+		  const bucket = 'samson-ocr';
+		  const timeStamp = new Date().getTime();
+		  const datetime = (new Date()).toISOString().slice(0,10);
+		  const randomNumber = parseInt(Math.random()*18081).toString(); // random number prefix for epoch to ensure there's no collision when lambda reads from s3
 
-		// save to s3 bucket
-		let url = `http://samson-ocr.s3.amazonaws.com/${datetime}/${randomNumber}${timeStamp}`;
-		//const s3Upload = await fetch(url, {
-		//	method: "PUT",
-		//	headers: {
-		//		"x-amz-acl": "bucket-owner-full-control"
-		//	},
-		//	body: file
-		//});
-		const fakePath = "2020-02-10/9551581300905669"
+		  // save to s3 bucket
+		  let url = `http://samson-ocr.s3.amazonaws.com/${datetime}/${randomNumber}${timeStamp}`;
+		  const s3Upload = await fetch(url, {
+		  	method: "PUT",
+		  	headers: {
+		  		"x-amz-acl": "bucket-owner-full-control"
+		  	},
+		  	body: file
+		  });
 
-		// parse s3 files
-		let response = await fetch("http://localhost:8001/read", {
-			method: "POST",
-			body: JSON.stringify({
-				Bucket: bucket,
-				S3Path: fakePath, //`${datetime}/${randomNumber}${timeStamp}`
-			})
-		});
-		let data = await response.json()
-		console.log(data);
-		//let parsableData = simplifyGoogleVAPI(data)
+		  // parse s3 files
+		  let response = await fetch("http://localhost:8001/read", {
+		  	method: "POST",
+		  	body: JSON.stringify({
+		  		Bucket: bucket,
+		  		S3Path: `${datetime}/${randomNumber}${timeStamp}` //"2020-02-10/9551581300905669" -> fake path
+		  	})
+		  });
+		  let data = await response.text()
+		  data = data.replace(/: None/g, ': null');
+		  data = data.replace(/: False/g, ': false');
+		  data = data.replace(/: True/g, ': true');
+		  data = data.replace(/'/g, '"');
+		  console.log(data);
+		  data = JSON.parse(data);
+		  let parsableData = simplifyGoogleVAPI(data)
 
-		//console.log(parsableData);
-		//setRawOcrResult(parsableData);
-		//return parsableData;
+		  setRawOcrResult(parsableData);
+		*/
 
-		//const fetchResult = testData;
-		//const simplified = simplifyGoogleVAPI(fetchResult);
-		//setRawOcrResult(simplified);
+		const fetchResult = testData;
+		const simplified = simplifyGoogleVAPI(fetchResult);
+		setRawOcrResult(simplified);
+	}
+
+	const getCurrentMode = () => {
+		return currentMode;
 	}
 
   return (
@@ -79,7 +87,7 @@ const Home = (props) => {
 
       <Canvas 
         imageFile={uploadedFile}
-        lineHighlight={currentMode}
+				getLineHighlight={getCurrentMode}
 				rawOcrResult={rawOcrResult}
       />
 

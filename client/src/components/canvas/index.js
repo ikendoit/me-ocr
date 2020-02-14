@@ -6,7 +6,7 @@ import { uniqifyWordBlockObject } from "../../utils/data-tools"
 const Canvas = (props) => {
 
 	const canvasRef = useRef(null); 
-	let [isTrackingMouse, setIsTrackingMouse] = useState(false);
+	let [isTrackingMouse, setIsTrackingMouse]   = useState(false);
 	const [drawnLines, setDrawnLines]           = useState([]);
 	const [currentLine, setCurrentLine]         = useState([]);
 	const [detectedBlocksGroup, setDetectedBlockGroup] = useState({});
@@ -21,10 +21,13 @@ const Canvas = (props) => {
 
 	const onCanvasMouseMove = (e) => {
 		if (!isTrackingMouse) return;
+
+		const lineHighlight = props.getLineHighlight();
+
 		const mouseCoord = getMouseCoord(e, canvasRef.current)
 		currentLine.push(mouseCoord);
 		setCurrentLine(currentLine)
-		drawLine(currentLine, props.lineHighlight, canvasRef.current)
+		drawLine(currentLine, lineHighlight, canvasRef.current)
 
 		// for every 5 points detected with mouse, perform tracking of crossed blocks
 		if (currentLine.length % 5 === 0) {
@@ -32,20 +35,21 @@ const Canvas = (props) => {
 			// detect blocks the line has crossed, save the ids
 			const detectedBlocks = detectOverlapBlocks(props.rawOcrResult, currentLine);
 			// init array if not already
-			if (!detectedBlocksGroup[props.lineHighlight]) detectedBlocksGroup[props.lineHighlight] = [];
+			if (!detectedBlocksGroup[lineHighlight]) detectedBlocksGroup[lineHighlight] = [];
 			// add the detected Blocks into group
-			detectedBlocksGroup[props.lineHighlight] = detectedBlocksGroup[props.lineHighlight].concat(detectedBlocks);
+			detectedBlocksGroup[lineHighlight] = detectedBlocksGroup[lineHighlight].concat(detectedBlocks);
 
 		}
 	}
 
 	const onCanvasMouseUp = (e) => {
 		isTrackingMouse = false;
-		if (!props.lineHighlight) {	
+		const lineHighlight = props.getLineHighlight()
+		if (!lineHighlight) {	
 			return;
 		}
 		drawnLines.push({
-			name: props.lineHighlight,
+			name: lineHighlight,
 			data: [...currentLine]
 		})
 		setCurrentLine([])
@@ -72,22 +76,22 @@ const Canvas = (props) => {
     // load to image to get it's width/height
     var img = new Image();
     img.onload = function() {
-        // scale canvas to image
-        ctx.canvas.width = img.width;
-        ctx.canvas.height = img.height;
-        // draw image
-        ctx.drawImage(img, 0, 0
-            , ctx.canvas.width, ctx.canvas.height
-        );
+      // scale canvas to image
+      ctx.canvas.width = img.width;
+      ctx.canvas.height = img.height;
+      ctx.drawImage(img, 0, 0
+          , ctx.canvas.width, ctx.canvas.height
+      );
+			loadWordBlocksOnCanvas();
     }
     // this is to setup loading the image
     reader.onloadend = function () {
-        img.src = reader.result;
+      img.src = reader.result;
+	  	addEventListenerCanvas();
+      setDetectedBlockGroup([]);
     }
     // this is to read the file
    	reader.readAsDataURL(file);
-		addEventListenerCanvas()
-    setDetectedBlockGroup([]);
 	}
 
 	/*
@@ -95,12 +99,17 @@ const Canvas = (props) => {
 		render the words on the screen.
 	*/
 	const loadWordBlocksOnCanvas = () => {
-		drawWordBlocks(props.rawOcrResult, canvasRef.current);
+		if (canvasRef.current && props.rawOcrResult.length > 0) {
+			drawWordBlocks(props.rawOcrResult, canvasRef.current);
+		}
 	}
 				
 	useEffect( () => {
 
-		if (!canvasRef.current) return;
+		if (!canvasRef.current) {
+			console.log("canvas ref is not initiated");
+			return;
+		}
 		if (props.imageFile) {
 			const ctx = canvasRef.current.getContext('2d');
 			ctx.clearRect(0,0,canvasRef.width, canvasRef.height);
@@ -108,11 +117,6 @@ const Canvas = (props) => {
 		}
 
 	} , [canvasRef.current, props.imageFile, props.rawOcrResult])
-
-	if (canvasRef.current && props.rawOcrResult.length > 0) {
-		addEventListenerCanvas();
-		loadWordBlocksOnCanvas();
-	}
 
 	console.log('rendering: ',detectedBlocksGroup);
 	return (
