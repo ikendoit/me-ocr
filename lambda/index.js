@@ -47,13 +47,9 @@ exports.handler = async (event, ctx, callback) => {
 			Key: body.S3Path
 		}).promise(); 
 
-		fs.writeFileSync(fileName, data.Body);
-		console.log("writing to file: ", fileName);
-
 		// run vision api on downloaded file
-	  const [result] = await client.documentTextDetection(fileName, { imageContext: { "languageHints": ["vi-t-i0-handwrit"] } });
+	  const [result] = await client.documentTextDetection(fileName, { imageContext: { "languageHints": ["vi-Latn-handwrit"] } });
 		const fullTextAnnotation = result.fullTextAnnotation;
-				//fs.writeFileSync(`./${imageName}.json`, JSON.stringify(fullTextAnnotation, null, 2))
 
 		console.log(JSON.stringify(fullTextAnnotation, null, 2));
 

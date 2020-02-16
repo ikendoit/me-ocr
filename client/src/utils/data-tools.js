@@ -75,7 +75,7 @@ const convertVerticesTo2DPolygon = (vertices) => {
 	}
 	- array elements are unique
 */
-export const uniqifyWordBlockObject = (wordBlockGroups) => {
+export const uniqifyBlocksGroupObject = (wordBlockGroups) => {
 	for (let key in wordBlockGroups) {
 		const elements = wordBlockGroups[key]
 		const uniqDict = elements.reduce( (master, ele) => {
@@ -87,8 +87,153 @@ export const uniqifyWordBlockObject = (wordBlockGroups) => {
 	}
 }
 
+/*
+	param: wordBlockGroups: {
+		<group_name>: [
+			coordinate: [ [x,y] x 4 ]
+			value
+		] 
+	} 
+	return [
+		type: 'group_name'
+		coordinate: [ [x,y] x 4 ]
+		value
+	}
+	- array elements are unique
+*/
+export const flattenBlockGroupObject = (wordBlockGroups) => {
+	let result = []
+	for (let typeName in wordBlockGroups) {
+		wordBlockGroups[typeName].forEach(block => block.type = typeName)
+		result = result.concat( wordBlockGroups[typeName] )
+	}
+	return result;
+}
+
 export const autoConvertGoogleVAPIToTable = (visionAPIContent) => {
 
 	console.log("testing auto conversion");
 
+}
+
+/*
+	Receive:
+		wordBlockArray: [
+				{
+					type: "col-1"
+					wordCoordinate: [ [x,y] x5 ]: polygon 
+					value: string 
+				}
+				{
+					type: "col-2"
+					wordCoordinate: [ [x,y] x5 ]: polygon 
+					value: string 
+				}
+			]
+
+	Return: [
+		[ "col1", "col2", "col3".. ]
+		[ "val1", "val2", "val3".. ]
+		[ "val4", "val5", "val6".. ]
+	]
+
+*/
+export const convertPageDetectionTo2dArray = (wordBlockArray) => {
+
+	const allLines = [];
+
+	// sort block array by Y coordinate of top-left
+	wordBlockArray.sort( (x,y) => x.wordCoordinate[0][1] > y.wordCoordinate[0][1]);
+
+	/* iterate the blocks array
+	     detect blocks in same line by
+				 iterate each block, find a line that cuts its middle 
+			 	find other blocks that intersects with that line. Put them to a group
+			 continue, until the array has no more elements to process
+	*/
+	let currentLine = {};
+	for (let i in wordBlockArray) {
+
+		const currentBlock = wordBlockArray[i];
+
+		// check if a line that can contain this block already exists
+		const hostLine = allLines.find(line => checkWordBlockIntersectHorizonLine(currentBlock, line.yValue))
+
+		if (hostLine != null) {
+			hostLine.blocks.push(currentBlock)
+		} else {
+			const middleYValue = getMiddlePointOfBlock(currentBlock);
+			allLines.push({
+				yValue: middleYValue,
+				blocks: [ currentBlock ]
+			});
+		}
+	}
+
+	return allLines;
+
+}
+
+/*
+	given: [
+		{
+			yValue: float 
+			blocks: [ wordCoordinate, value, type ]
+		}
+	]
+
+	return [ [ value, value ] ] - 2d array, representatble in html table
+*/
+export const flatten2DArrayBlock = (table2DBlocks) => {
+	const columns = ["Ghi_Chu", "Thu", "Chi"] // TODO: to be replced with params
+
+	let result = [];
+	// sort the line, based on yValue - veritcal middle point of the line
+	table2DBlocks.sort ( (x,y) => x.yValue > y.yValue ? 1 : -1 );
+	for (let line of table2DBlocks) {
+		// sort the blocks, so that they order horizontally
+		line.blocks.sort( (x,y) => x.wordCoordinate[0][0] > y.wordCoordinate[0][0] ? 1 : -1 )
+
+		// init the different columns
+		const currentLine = Array(columns.length).fill("")
+		for (let block of line.blocks) {
+			const columnIndex = columns.findIndex( e => e === block.type );
+			if ( columnIndex === -1  || columnIndex == null ){
+				console.log(columnIndex)
+				throw new Error(`What's happening, type ${block.type} should always match column name ${columns.toString()}`)
+			}
+
+			currentLine[columnIndex] += block.value + " "
+		}
+		result.push(currentLine);
+	}
+
+	return result
+}
+
+/*
+	given: wordBlock {
+		coordinates: [ [x,y] ]
+		value
+	}
+
+	return y-value: the middle point, vertically, of the block
+*/
+const getMiddlePointOfBlock = (wordBlock) => {
+	const yValue = (wordBlock.wordCoordinate[3][1] + wordBlock.wordCoordinate[0][1]) / 2
+	return yValue
+}
+
+/*
+	given: wordBlock {
+		coordinates: [ [x,y] ]
+		value
+	},
+	yValue: yValue of a horizontal line, that may or may not intersects the wordBlock
+
+	return boolean: does the line cut the block
+*/
+const checkWordBlockIntersectHorizonLine = (wordBlock, yValue) => {
+	return wordBlock.wordCoordinate[3][1] >= yValue &&
+		 wordBlock.wordCoordinate[0][1] <= yValue
 }

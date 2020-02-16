@@ -5,6 +5,7 @@ import style from './style';
 import Canvas from '../../components/canvas'
 import ModeSelection from '../../components/mode-selection'
 import { simplifyGoogleVAPI } from "../../utils/data-tools"
+import TableDisplay from '../../components/table-display'
 import testData from "../../jsons/8.json"
 
 const Home = (props) => {
@@ -12,6 +13,7 @@ const Home = (props) => {
   const [ uploadedFile, setUploadedFile ] = useState(null);
 	const [ currentMode, setCurrentMode ] = useState('Ghi_Chu'); //TODO: user can create modes
 	const [ rawOcrResult, setRawOcrResult ] = useState([]);
+	const [ tableData, setTableData ] = useState([ [] ]);
 
   const onFileChange = event => {
     const file = event.target.files[0];
@@ -70,10 +72,6 @@ const Home = (props) => {
 		setRawOcrResult(simplified);
 	}
 
-	const getCurrentMode = () => {
-		return currentMode;
-	}
-
   return (
     <div class={style.home}>
       <h1>Excel Generator</h1>
@@ -85,11 +83,16 @@ const Home = (props) => {
 
 			<ModeSelection setMode={setCurrentMode} mode={currentMode} />
 
-      <Canvas 
-        imageFile={uploadedFile}
-				getLineHighlight={getCurrentMode}
-				rawOcrResult={rawOcrResult}
-      />
+			<div>
+				<Canvas 
+					imageFile={uploadedFile}
+					lineHighlight={currentMode}
+					rawOcrResult={rawOcrResult}
+					setTableData={setTableData}
+				/>
+
+				<TableDisplay table={tableData} />
+			</div>
 
     </div>
   )

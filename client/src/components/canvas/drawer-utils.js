@@ -10,7 +10,7 @@ export const drawLine = (currentLine, lineHighlight, canvasRefObj) => {
 	ctx.lineWidth = "10";
 	ctx.strokeStyle = 'rgba(0,0,0,0.7)';
 	if (lineHighlight === "Chi") ctx.strokeStyle = "yellow";
-	if (lineHighlight === "Thu") ctx.strokeStyle = "green";
+	else if (lineHighlight === "Thu") ctx.strokeStyle = "green";
   else ctx.strokeStyle = "black";
 
 	// points

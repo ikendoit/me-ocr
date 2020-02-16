@@ -1,7 +1,12 @@
 import { useRef, useEffect, useState } from "preact/hooks"
 import { drawLine, drawWordBlocks, getMouseCoord } from "./drawer-utils"
 import { detectOverlapBlocks } from "../../utils/canvas-tools"
-import { uniqifyWordBlockObject } from "../../utils/data-tools"
+import { 
+	uniqifyBlocksGroupObject, 
+	flattenBlockGroupObject, 
+	convertPageDetectionTo2dArray,
+	flatten2DArrayBlock
+} from "../../utils/data-tools"
 
 const Canvas = (props) => {
 
@@ -22,7 +27,7 @@ const Canvas = (props) => {
 	const onCanvasMouseMove = (e) => {
 		if (!isTrackingMouse) return;
 
-		const lineHighlight = props.getLineHighlight();
+		const lineHighlight = props.lineHighlight;
 
 		const mouseCoord = getMouseCoord(e, canvasRef.current)
 		currentLine.push(mouseCoord);
@@ -44,7 +49,7 @@ const Canvas = (props) => {
 
 	const onCanvasMouseUp = (e) => {
 		isTrackingMouse = false;
-		const lineHighlight = props.getLineHighlight()
+		const lineHighlight = props.lineHighlight
 		if (!lineHighlight) {	
 			return;
 		}
@@ -52,13 +57,19 @@ const Canvas = (props) => {
 			name: lineHighlight,
 			data: [...currentLine]
 		})
-		setCurrentLine([])
+		// clear state
+		setCurrentLine([]);
 		setIsTrackingMouse(isTrackingMouse);
-		uniqifyWordBlockObject(detectedBlocksGroup)
-		console.log(detectedBlocksGroup);
+		uniqifyBlocksGroupObject(detectedBlocksGroup) // uniqify since block group raw will have duplicate blocks, since the stroke goes through those blocks more than once.
+		const flattened = flattenBlockGroupObject(detectedBlocksGroup);
+		const table2DBlocks = convertPageDetectionTo2dArray(flattened)
+		const table2DStrings = flatten2DArrayBlock(table2DBlocks)
+		console.log(table2DStrings);
+		props.setTableData(table2DStrings)
 	}
 
 	const addEventListenerCanvas = () => {
+		if (!canvasRef || !canvasRef.current) return;
 		canvasRef.current.onmousedown = onCanvasMouseDown
 		canvasRef.current.onmousemove = onCanvasMouseMove
 		canvasRef.current.onmouseup = onCanvasMouseUp
@@ -106,8 +117,8 @@ const Canvas = (props) => {
 				
 	useEffect( () => {
 
+		addEventListenerCanvas();
 		if (!canvasRef.current) {
-			console.log("canvas ref is not initiated");
 			return;
 		}
 		if (props.imageFile) {
@@ -118,9 +129,12 @@ const Canvas = (props) => {
 
 	} , [canvasRef.current, props.imageFile, props.rawOcrResult])
 
-	console.log('rendering: ',detectedBlocksGroup);
+	addEventListenerCanvas()
 	return (
-		<div>
+		<span style={{
+			display: "inline",
+			width: '70%'
+		}}>
 			<canvas
 				id="myCanvas"
 				height="1000px"
@@ -133,7 +147,7 @@ const Canvas = (props) => {
 				Your browser does not support the HTML5 canvas tag.
 			</canvas>
 			<img id="place-holder-img-upload"> </img>
-		</div>
+		</span>
 	)
 }
 
