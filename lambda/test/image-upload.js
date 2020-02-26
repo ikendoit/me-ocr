@@ -5,19 +5,22 @@ const fs = require("fs");
 const test1 = async () => {
 
 	const image = fs.readFileSync("test.jpg");
-	const form = new FormData();
-	form.append("image", image);
+	const body = JSON.stringify({
+		Bucket: 'samson-ocr-us-west-2',
+		S3Path: "2020-02-24/174871582526597961"
+	})
 
-	let data = await fetch("http://localhost:8001/read", {
+	let response = await fetch("http://localhost:8001/read", {
 		method: "POST",
 		//mode: 'no-cors',
-		headers: {
-			"Content-Type": "application/octet-stream"
-		},
-		body: form
+		body
 	});
-	data = await data.json();
-
+	let data = await response.text()
+	data = data.replace(/: None/g, ': null');
+	data = data.replace(/: False/g, ': false');
+	data = data.replace(/: True/g, ': true');
+	data = data.replace(/'/g, '"');
+	data = JSON.parse(data);	
 	console.log(data);
 }
 

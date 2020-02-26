@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "preact/hooks"
+import "./styles.css"
 
 const TableDisplay = (props) => {
 	
@@ -20,7 +21,12 @@ const TableDisplay = (props) => {
 			allRows.push(currentRow);
 		}
 
-		const currentTable = <table>{allRows}</table>;
+		const currentTable = (<table style={{
+				border: '1px solid #ddd',
+				padding: 8
+				}}>{allRows}
+			</table>
+		)
 
     return currentTable;
   };
@@ -29,7 +35,11 @@ const TableDisplay = (props) => {
 	if (!props.table) return <div />
 
 	return (
-		<span> 
+		<span style={{
+			display: 'inline',
+			width: '28%',
+			marginLeft: '3%'
+		}}> 
       {generateTables()}
 		</span>
 	)

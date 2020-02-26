@@ -110,10 +110,49 @@ export const flattenBlockGroupObject = (wordBlockGroups) => {
 	return result;
 }
 
-export const autoConvertGoogleVAPIToTable = (visionAPIContent) => {
+/*
+	receive :
+		- simplified google VAPI Response, 
+		- mode: TABLE - TEXT
+	return: [ [ primitive-type ] ] - representable 2d array in <table/>
+*/
+export const pseudoParseVAPI = (visionAPIContent, mode = "TEXT") => {
+	const words = visionAPIContent.reduce ( (master,e) => master.concat(e.words) , []);
+	const lines = convertPageDetectionTo2dArray(words)
+	console.log(lines);
+	if (mode === "TEXT") {
+		return parseLinesIntoText(lines)
+	} else {
+		const table = parseLinesIntoColumns(lines)
+		return table;
+	}
+}
 
-	console.log("testing auto conversion");
+const parseLinesIntoText = (lines) => {
+	for (let line of lines) {
+		line.blocks.sort( (x,y) => x.wordCoordinate[0][0] > y.wordCoordinate[0][0] ? 1 : -1 )
+		line.value = line.blocks.reduce( (master,ele) => {
+			return master + ele.value + " ";
+		}, "");
+	}
+	const textBlock = lines.reduce( (master, line) => {
+		return master + line.value + "\n"
+	}, "");
+	return [[ textBlock ]]
+}
 
+/*
+	receive parsed Lines array [
+		{ yValue: float, blocks: { wordCoordinate, value } }
+	]
+	return [ [ primitive-type ] ]
+*/
+const parseLinesIntoColumns = (lines, columnNumber) => {
+	let result = [];
+	for (let line of lines) {
+		// sort the lines by x value first.
+		line.blocks.sort( (x,y) => x.wordCoordinate[0][0] > y.wordCoordinate[0][0] ? 1 : -1 )
+	}
 }
 
 /*
@@ -130,11 +169,8 @@ export const autoConvertGoogleVAPIToTable = (visionAPIContent) => {
 					value: string 
 				}
 			]
-
 	Return: [
-		[ "col1", "col2", "col3".. ]
-		[ "val1", "val2", "val3".. ]
-		[ "val4", "val5", "val6".. ]
+		{ yValue: float, blocks: {type, wordCoordinate, value} }
 	]
 
 */
@@ -151,7 +187,6 @@ export const convertPageDetectionTo2dArray = (wordBlockArray) => {
 			 	find other blocks that intersects with that line. Put them to a group
 			 continue, until the array has no more elements to process
 	*/
-	let currentLine = {};
 	for (let i in wordBlockArray) {
 
 		const currentBlock = wordBlockArray[i];

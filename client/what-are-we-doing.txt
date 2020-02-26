@@ -1,10 +1,4 @@
 TODO:
 
-	- run through the word boxes, find words that overlaps, group into table
-
-			- try and select "chi", "thu" and "description" columns
-
-	- highlight rows in each page
-
 	- find orientation of row, map that to word boxes
 

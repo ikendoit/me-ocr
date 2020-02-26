@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "sam local start-api -p 8001"
+    "start": "sam local start-api -p 8001 --host 0.0.0.0 --skip-pull-image"
   },
   "author": "",
   "license": "ISC",

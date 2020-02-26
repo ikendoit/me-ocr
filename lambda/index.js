@@ -1,21 +1,9 @@
 'use strict';
 
-const vision = require("@google-cloud/vision");
-const parser = require("aws-lambda-multipart-parser");
-const fs = require("fs");
-
-// S3
-// Load the AWS SDK for Node.js
-const AWS = require('aws-sdk');
-// Load credentials and set Region from JSON file
-AWS.config.loadFromPath('./credentials/aws-config.json');
-const s3 = new AWS.S3({apiVersion: '2006-03-01'})
-
-// GCP - Cloud Vision
-// Creates a client
-const client = new vision.ImageAnnotatorClient({
-	keyFilename: "./credentials/service_account.json"
-});
+const {
+	parseS3File, 
+	parseGCPVision
+} = require("./utils");
 
 const headersApi = {
 	"Access-Control-Allow-Headers": 
@@ -23,11 +11,11 @@ const headersApi = {
 	"Access-Control-Allow-Methods": "HEAD,OPTIONS,POST",
 	"Access-Control-Allow-Origin": "*",
 }
-
 // MAIN
 exports.handler = async (event, ctx, callback) => {
 
 	try {
+
 		const body = JSON.parse(event.body);
 
 		// check request validity
@@ -40,30 +28,28 @@ exports.handler = async (event, ctx, callback) => {
 			return;
 		}
 
-		// download file to local storage
-		const fileName = `/tmp/${body.S3Path.replace(/\//g,'_')}`
-		const data = await s3.getObject({
-			Bucket: body.Bucket,
-			Key: body.S3Path
-		}).promise(); 
-
-		// run vision api on downloaded file
-	  const [result] = await client.documentTextDetection(fileName, { imageContext: { "languageHints": ["vi-Latn-handwrit"] } });
-		const fullTextAnnotation = result.fullTextAnnotation;
-
-		console.log(JSON.stringify(fullTextAnnotation, null, 2));
+		const [ gcpTextAnnotation, awsTextAnnotation ] = await Promise.all([
+			parseGCPVision(body.S3Path, body.Bucket),
+			parseS3File(body.S3Path, body.Bucket)
+		]);
 
 		// response to client 
 		callback(null, {
 			statusCode: 200,
 			headers: headersApi,
-			body: fullTextAnnotation
+			body: {
+				gcp: gcpTextAnnotation,
+				aws: awsTextAnnotation
+			}
 		})
 
-		return fullTextAnnotation;
+		return {
+			gcp: gcpTextAnnotation,
+			aws: awsTextAnnotation
+		};
 
 	} catch(err) {
-		console.log(err);
+		console.log(err, event.body);
 		callback(null, {
 			code: 400, 
 			headers: headersApi,

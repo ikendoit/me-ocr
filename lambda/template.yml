@@ -3,6 +3,9 @@ Transform: AWS::Serverless-2016-10-31
 Description: |
   me-ocr-google-vision-api |
   SAM Template for me-ocr lambda function 
+properties:
+  MemorySise: 256
+  
   
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -12,11 +15,11 @@ Globals:
     Cors:
       AllowMethods: "'GET,POST,OPTIONS'"
       AllowHeaders: "'content-type,Content-Type'"
-      AllowOrigin: "'http://localhost:8080,http://127.0.0.1:8080'"
+      AllowOrigin: "'http://localhost:8080,http://127.0.0.1:8080,http://192.168.1.76:8080'"
       AllowCredentials: "'*'"
     BinaryMediaTypes:
       # These are equivalent to image/gif and image/png when deployed
-      - image~1gif
+      - imagy~1gif
       - image~1png
       - image~1jpg
       - image~1jpeg

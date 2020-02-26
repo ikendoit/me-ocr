@@ -6,7 +6,7 @@
 */
 export const drawLine = (currentLine, lineHighlight, canvasRefObj) => {
   const ctx = canvasRefObj.getContext('2d');
-  ctx.globalAlpha = 0.5;
+  ctx.globalAlpha = 0.3;
 	ctx.lineWidth = "10";
 	ctx.strokeStyle = 'rgba(0,0,0,0.7)';
 	if (lineHighlight === "Chi") ctx.strokeStyle = "yellow";
@@ -74,7 +74,6 @@ export const getMouseCoord = (e, canvasRefObj) => {
 */
 const canvasCoordFromWordCoord = (wordCoord) => {
   return {
-    // TODO: check if this ratio will wokr
     X: wordCoord[0][0],
     Y: wordCoord[0][1],
     W: (wordCoord[2][0] - wordCoord[0][0]),
