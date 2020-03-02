@@ -2,7 +2,6 @@
 	simplify google vision api response
 	return: [{
 		paragraphCoordinate: [ [x,y] ]
-		value: text
 		words: [{
 			wordCoordinate: [ [x,y] ],
 			value: text
@@ -272,3 +271,146 @@ const checkWordBlockIntersectHorizonLine = (wordBlock, yValue) => {
 	return wordBlock.wordCoordinate[3][1] >= yValue &&
 		 wordBlock.wordCoordinate[0][1] <= yValue
 }
+
+/*
+	Given:
+		Textract Raw Response. 
+*/
+export const mergeGCPWithTextract = ({ aws, gcp }) => {
+
+	console.log("merging right now");
+	console.log(gcp, aws);
+
+	let tableBlock = aws.Blocks.find( block => block.BlockType === "TABLE" )
+	if (!tableBlock) return;
+	let tableCells = aws.Blocks.filter(b => tableBlock.Relationships[0].Ids.includes(b.Id));
+
+	// match table cells with value from gcp
+	for (let cell of tableCells) {
+		// convert polygon coordinate from [ { X, Y } ] => [ [x,y] ]
+		cell.Geometry.Polygon = cell.Geometry.Polygon.map( a => [ a.X, a.Y ] )
+
+		const value = searchTextInGcpByCoordinate(gcp, cell.Geometry.Polygon)
+		cell.Text = value;
+	}
+
+	const gapFilledChildrenCells = fillGapOfTable(tableCells);
+	let array2D = convertCellArrayTo2DArray(gapFilledChildrenCells);
+
+	// fill 1d cells array with exploded cells, to flatten spans of cols and rows
+	return array2D
+
+}
+
+/*
+	given gcp Object: [{
+		paragraphCoordinate: [ [x,y]x5 ],
+		words: [ {
+			wordCoordinate : [ [x,y]x5 ] TOP_LEFT -> TOP_RIGHT -> BOT_RIGHT -> BOT_LEFT -> TOP_LEFT
+			value
+		} ]
+	}]
+	cellPolygonTextract: [ [X, Y] x 4 ] TOP_LEFT -> TOP_RIGHT -> BOT_RIGHT -> BOT_LEFT
+
+	return: string - the text value in the coordinate that match the gcp
+*/
+const searchTextInGcpByCoordinate = (gcp, cellPolygonTextract) => {
+	const squareTextract = {
+		left: cellPolygonTextract[0][0] * 1000,
+		right: cellPolygonTextract[2][0] * 1000,
+		top: cellPolygonTextract[0][1] * 1000,
+		bottom: cellPolygonTextract[2][1] * 1000,
+	}
+
+	let values = [];
+
+	for (let paragraph of gcp) {
+		const squareParagraph = {
+			left: paragraph.paragraphCoordinate[0][0],
+			right: paragraph.paragraphCoordinate[2][0],
+			top: paragraph.paragraphCoordinate[0][1],
+			bottom: paragraph.paragraphCoordinate[2][1],
+		}
+		if (squareIntersect(squareParagraph, squareTextract)) {
+			values = values.concat(paragraph.words.map( word => word.value));
+		}
+	}
+
+	return values.join(" ");
+}
+
+// return boolean: check if 2 squares: { left, top, bottom, right } intersects 
+const squareIntersect = (square1, square2) => {
+	const intersectX = (
+		( square1.left > square2.left && square1.left < square2.right ) ||
+		( square2.left > square1.left && square2.left < square1.right )
+	)
+
+	const intersectY = (
+		( square1.top > square2.top && square1.top < square2.bottom ) ||
+		( square2.top > square1.top && square2.top < square1.bottom )
+	)
+
+	return intersectX && intersectY
+}
+
+
+const fillGapOfTable = textractCellsArray => {
+  for (let cell of textractCellsArray) {
+    if (cell.ColumnSpan >= 2) {
+      for (let i = 1; i < cell.ColumnSpan; i++) {
+        textractCellsArray.push(
+          genEmptyCell(
+            cell.ColumnIndex + 1,
+            cell.RowIndex,
+            cell.Geometry,
+            cell.Page,
+            cell.Id
+          )
+        );
+        cell.ColumnSpan = cell.ColumnSpan - 1;
+      }
+    }
+    if (cell.RowSpan >= 2) {
+      for (let i = 1; i < cell.RowSpan; i++) {
+        textractCellsArray.push(
+          genEmptyCell(
+            cell.ColumnIndex,
+            cell.RowIndex + 1,
+            cell.Geometry,
+            cell.Page,
+            cell.Id
+          )
+        );
+        cell.RowSpan = cell.RowSpan - 1;
+      }
+    }
+  }
+
+  textractCellsArray.sort((a, b) => (a.ColumnIndex < b.ColumnIndex ? 1 : -1));
+  textractCellsArray.sort((a, b) => (a.RowIndex > b.RowIndex ? 1 : -1));
+
+  return textractCellsArray;
+};
+
+// convert 1d Textract-cell array => 2D String value table
+const convertCellArrayTo2DArray = cellsArray => {
+  const arraySize = cellsArray.reduce(
+    (master, cell) => {
+      if (master.col < cell.ColumnIndex) master.col = cell.ColumnIndex;
+      if (master.row < cell.RowIndex) master.row = cell.RowIndex;
+      return master;
+    },
+    { col: 0, row: 0 }
+  );
+
+  const resultArray = [...Array(arraySize.row)].map(x =>
+    Array(arraySize.col).fill("")
+  );
+
+  for (let cell of cellsArray) {
+    resultArray[cell.RowIndex - 1][cell.ColumnIndex - 1] = cell.Text;
+  }
+
+  return resultArray;
+};

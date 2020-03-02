@@ -1,4 +1,3 @@
-TODO:
+AWS textract is not working well with rotated imagesssss
 
-	- find orientation of row, map that to word boxes
-
+We are augmenting camera with straight lines, so people know when an image is actually straight.

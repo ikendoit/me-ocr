@@ -21,7 +21,7 @@ const test1 = async () => {
 	data = data.replace(/: True/g, ': true');
 	data = data.replace(/'/g, '"');
 	data = JSON.parse(data);	
-	console.log(data);
+	console.log(JSON.stringify(data, null, 2));
 }
 
 test1();

@@ -4,9 +4,9 @@ import { input, Upload, message, Button, Icon  } from 'antd';
 import style from './style';
 import Canvas from '../../components/canvas'
 import ModeSelection from '../../components/mode-selection'
-import { simplifyGoogleVAPI, pseudoParseVAPI } from "../../utils/data-tools"
+import { simplifyGoogleVAPI, pseudoParseVAPI, mergeGCPWithTextract } from "../../utils/data-tools"
 import TableDisplay from '../../components/table-display'
-import testData from "../../jsons/8.json"
+import testData from "../../jsons/new-8.json"
 
 // function locks, to stop event listeners from calling a function multiple-times
 var functionLock1 = false;
@@ -35,54 +35,66 @@ const Home = (props) => {
 	*/
 	const loadGoogleVAPI = async (file) => {
 
-		  // variables
-		  const bucket = 'samson-ocr-us-west-2';
-		  const timeStamp = new Date().getTime();
-		  const datetime = (new Date()).toISOString().slice(0,10);
-		  const randomNumber = parseInt(Math.random()*18081).toString(); // random number prefix for epoch to ensure there's no collision when lambda reads from s3
+		  // // variables
+		  // const bucket = 'samson-ocr-us-west-2';
+		  // const timeStamp = new Date().getTime();
+		  // const datetime = (new Date()).toISOString().slice(0,10);
+		  // const randomNumber = parseInt(Math.random()*18081).toString(); // random number prefix for epoch to ensure there's no collision when lambda reads from s3
 
-		  // save to s3 bucket
-		  let url = `http://${bucket}.s3.amazonaws.com/${datetime}/${randomNumber}${timeStamp}`;
-		  const s3Upload = await fetch(url, {
-		  	method: "PUT",
-		  	headers: {
-		  		"x-amz-acl": "bucket-owner-full-control"
-		  	},
-		  	body: file
-		  });
+		  // // save to s3 bucket
+		  // let url = `http://${bucket}.s3.amazonaws.com/${datetime}/${randomNumber}${timeStamp}`;
+		  // const s3Upload = await fetch(url, {
+		  // 	method: "PUT",
+		  // 	headers: {
+		  // 		"x-amz-acl": "bucket-owner-full-control"
+		  // 	},
+		  // 	body: file
+		  // });
 
-		  // parse s3 files
-		  let response = await fetch("http://192.168.1.76:8001/read", {
-		  	method: "POST",
-		  	body: JSON.stringify({
-		  		Bucket: bucket,
-		  		S3Path: `${datetime}/${randomNumber}${timeStamp}` //"2020-02-10/9551581300905669" -> fake path
-		  	})
-		  });
-		  let data = await response.text()
-		  data = data.replace(/: None/g, ': null');
-		  data = data.replace(/: False/g, ': false');
-		  data = data.replace(/: True/g, ': true');
-		  data = data.replace(/'/g, '"');
-		  data = JSON.parse(data);
-		  let parsableData = simplifyGoogleVAPI(data)
+		  // // parse s3 files
+		  // let response = await fetch("http://192.168.1.76:8001/read", {
+		  // 	method: "POST",
+		  // 	body: JSON.stringify({
+		  // 		Bucket: bucket,
+		  // 		S3Path: `${datetime}/${randomNumber}${timeStamp}` //"2020-02-10/9551581300905669" -> fake path
+		  // 	})
+		  // });
+		  // let data = await response.text()
+		  // data = data.replace(/: None/g, ': null');
+		  // data = data.replace(/: False/g, ': false');
+		  // data = data.replace(/: True/g, ': true');
+		  // data = data.replace(/'/g, '"');
+		  // data = JSON.parse(data);
+		  // let parsableData = simplifyGoogleVAPI(data)
 
-		  setRawOcrResult(parsableData);
-			const arrayPseudoParsed = pseudoParseVAPI(parsableData)
-			console.log(arrayPseudoParsed);
-			setTableData(arrayPseudoParsed)
+		  // setRawOcrResult(parsableData);
+			// const arrayPseudoParsed = pseudoParseVAPI(parsableData)
+			// console.log(arrayPseudoParsed);
+			// setTableData(arrayPseudoParsed)
 
-		//const fetchResult = testData;
-		//const parsableData = simplifyGoogleVAPI(fetchResult);
-		//setRawOcrResult(parsableData);
-		//const arrayPseudoParsed = pseudoParseVAPI(parsableData)
+		const fetchResult = testData;
+		const parsableData = { gcp: {}, aws: {}}
+
+		// register the aws and gcp data into object.
+		parsableData.aws = fetchResult.aws;
+		parsableData.gcp = simplifyGoogleVAPI(fetchResult.gcp);
+
+		// set the raw ocr result, so that we can pass into canvas view
+		setRawOcrResult(parsableData.gcp);
+
+		// pre-parse the gcp vision, in case user does not want to parse themselves.
+		// MAY NOT NEED THIS, USE OUTPUT FROM MERGE AWS->GCP FUNCTION
+		//const arrayPseudoParsed = pseudoParseVAPI(parsableData.gcp)
 		//setTableData(arrayPseudoParsed)
-
+		console.log("doing the merge now");
+		const mergeOutput = mergeGCPWithTextract(parsableData)
+		console.log(mergeOutput)
+		setTableData(mergeOutput)
 
 	}
 
 
-	// TESTTTT ->
+	// TESTTTT ROTATION->
 		const performRotate = async (file, angle) => {
 			if (!file) return;
 			console.log("rotating: ", angle)
@@ -109,8 +121,47 @@ const Home = (props) => {
 		};
 	// <- END TESTTTT
 
+
+
+		try {
+			// Set constraints for the video stream
+			var constraints = { video: { facingMode: "user" }, audio: false };
+			// Define constants
+			const cameraView = document.querySelector("#camera--view"),
+					cameraOutput = document.querySelector("#camera--output"),
+					cameraSensor = document.querySelector("#camera--sensor"),
+					cameraTrigger = document.querySelector("#camera--trigger")
+			// Access the device camera and stream to cameraView
+			function cameraStart() {
+				navigator.mediaDevices
+						.getUserMedia(constraints)
+						.then(function(stream) {
+						track = stream.getTracks()[0];
+						cameraView.srcObject = stream;
+				})
+				.catch(function(error) {
+						console.error("Oops. Something is broken.", error);
+				});
+			}
+			// Take a picture when cameraTrigger is tapped
+			cameraTrigger.onclick = function() {
+					cameraSensor.width = cameraView.videoWidth;
+					cameraSensor.height = cameraView.videoHeight;
+					cameraSensor.getContext("2d").drawImage(cameraView, 0, 0);
+					cameraOutput.src = cameraSensor.toDataURL("image/webp");
+					cameraOutput.classList.add("taken");
+			};
+			// Start the video stream when the window loads
+			window.addEventListener("load", cameraStart, false);
+		} catch(err) {
+			console.log(err);
+		}
+
+
+
   return (
     <div class={style.home}>
+
       <h1>{ parseMode === "TABLE" ? "Excel" : "Text" } Generator</h1>
 
       <input
