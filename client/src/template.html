@@ -12,43 +12,7 @@
 		</script>
 
 		<style>
-			button {
-				display: inline-block;
-				border-radius: 4px;
-				background-color: #f4511e;
-				border: none;
-				color: #FFFFFF;
-				text-align: center;
-				font-size: 28px;
-				padding: 20px;
-				width: 200px;
-				transition: all 0.5s;
-				cursor: pointer;
-				margin: 5px;
-			}
-
-			button span:after {
-				content: '\00bb';
-				position: absolute;
-				opacity: 0;
-				top: 0;
-				right: -20px;
-				transition: 0.5s;
-			}
-
-			button:hover span {
-				padding-right: 25px;
-			}
-
-			button:hover span:after {
-				opacity: 1;
-				right: 0;
-			}
-
 			#camera, #camera--view, #camera--sensor, #camera--output{
-					position: fixed;
-					height: 100%;
-					width: 100%:
 					object-fit: cover;
 			}
 
@@ -57,28 +21,10 @@
 					filter: FlipH;
 			}
 
-			#camera--trigger{
-					width: 200px;
-					background-color: black;
-					color: white;
-					font-size: 16px;
-					border-radius: 30px;
-					border: none;
-					padding: 15px 20px;
-					text-align: center;
-					box-shadow: 0 5px 10px 0 rgba(0,0,0,0.2);
-					position: fixed;
-					bottom: 30px;
-					left: calc(50% - 100px);
-			}
 		</style>
 		<% preact.headEnd %>
 	</head>
 	<body>
 		<% preact.bodyEnd %>
-		<video id="camera--view" autoplay playsinline></video>
-		<canvas id="camera--sensor"> </canvas>
-		<img src="//:0" alt="" id="camera--output"> </img>
-		<button id="camera--trigger">Take a picture</button>
 	</body>
 </html>
