@@ -37,61 +37,71 @@ const Home = (props) => {
 	*/
 	const loadGoogleVAPI = async (file) => {
 
-		  // // variables
-		  // const bucket = 'samson-ocr-us-west-2';
-		  // const timeStamp = new Date().getTime();
-		  // const datetime = (new Date()).toISOString().slice(0,10);
-		  // const randomNumber = parseInt(Math.random()*18081).toString(); // random number prefix for epoch to ensure there's no collision when lambda reads from s3
+		  // variables
+		  const bucket = 'samson-ocr-us-west-2';
+		  const timeStamp = new Date().getTime();
+		  const datetime = (new Date()).toISOString().slice(0,10);
+		  const randomNumber = parseInt(Math.random()*18081).toString(); // random number prefix for epoch to ensure there's no collision when lambda reads from s3
 
-		  // // save to s3 bucket
-		  // let url = `http://${bucket}.s3.amazonaws.com/${datetime}/${randomNumber}${timeStamp}`;
-		  // const s3Upload = await fetch(url, {
-		  // 	method: "PUT",
-		  // 	headers: {
-		  // 		"x-amz-acl": "bucket-owner-full-control"
-		  // 	},
-		  // 	body: file
-		  // });
+		  // save to s3 bucket
+		  let url = `http://${bucket}.s3.amazonaws.com/${datetime}/${randomNumber}${timeStamp}`;
+		  const s3Upload = await fetch(url, {
+		  	method: "PUT",
+		  	headers: {
+					"x-amz-grant-full-control": "id=98ff39d827edc806f72b1268a96f607527818ee4f4007e2754cd9aba104b3980"
+		  	},
+		  	body: file
+		  });
+			console.log(s3Upload)
 
-		  // // parse s3 files
-		  // let response = await fetch("http://192.168.1.76:8001/read", {
-		  // 	method: "POST",
-		  // 	body: JSON.stringify({
-		  // 		Bucket: bucket,
-		  // 		S3Path: `${datetime}/${randomNumber}${timeStamp}` //"2020-02-10/9551581300905669" -> fake path
-		  // 	})
-		  // });
-		  // let data = await response.text()
-		  // data = data.replace(/: None/g, ': null');
-		  // data = data.replace(/: False/g, ': false');
-		  // data = data.replace(/: True/g, ': true');
-		  // data = data.replace(/'/g, '"');
-		  // data = JSON.parse(data);
-		  // let parsableData = simplifyGoogleVAPI(data)
+		  // parse s3 files
+		  let response = await fetch("http://192.168.1.76:8001/read", {
+		  	method: "POST",
+		  	body: JSON.stringify({
+		  		Bucket: bucket,
+		  		S3Path: `${datetime}/${randomNumber}${timeStamp}` //"2020-02-10/9551581300905669" -> fake path
+		  	})
+		  });
+		  let data = await response.text()
+		  data = data.replace(/: None/g, ': null');
+		  data = data.replace(/: False/g, ': false');
+		  data = data.replace(/: True/g, ': true');
+		  data = data.replace(/'/g, '"');
+		  data = JSON.parse(data);
 
-		  // setRawOcrResult(parsableData);
-			// const arrayPseudoParsed = pseudoParseVAPI(parsableData)
-			// console.log(arrayPseudoParsed);
-			// setTableData(arrayPseudoParsed)
+			const parsableData = { gcp: {}, aws: {}}
 
-		const fetchResult = testData;
-		const parsableData = { gcp: {}, aws: {}}
+			// register the aws and gcp data into object.
+			parsableData.aws = data.aws;
+			parsableData.gcp = simplifyGoogleVAPI(data.gcp);
 
-		// register the aws and gcp data into object.
-		parsableData.aws = fetchResult.aws;
-		parsableData.gcp = simplifyGoogleVAPI(fetchResult.gcp);
+			// set raw ocr of gcp on screen
+			setRawOcrResult(parsableData.gcp);
 
-		// set the raw ocr result, so that we can pass into canvas view
-		setRawOcrResult(parsableData.gcp);
+			// display table result ( merge from textract and gcp ) in html table
+			const mergeOutput = mergeGCPWithTextract(parsableData)
+			setTableData(mergeOutput)
 
-		// pre-parse the gcp vision, in case user does not want to parse themselves.
-		// MAY NOT NEED THIS, USE OUTPUT FROM MERGE AWS->GCP FUNCTION
-		//const arrayPseudoParsed = pseudoParseVAPI(parsableData.gcp)
-		//setTableData(arrayPseudoParsed)
-		console.log("doing the merge now");
-		const mergeOutput = mergeGCPWithTextract(parsableData)
-		console.log(mergeOutput)
-		setTableData(mergeOutput)
+
+
+		//const fetchResult = testData;
+		//const parsableData = { gcp: {}, aws: {}}
+
+		//// register the aws and gcp data into object.
+		//parsableData.aws = fetchResult.aws;
+		//parsableData.gcp = simplifyGoogleVAPI(fetchResult.gcp);
+
+		//// set the raw ocr result, so that we can pass into canvas view
+		//setRawOcrResult(parsableData.gcp);
+
+		//// pre-parse the gcp vision, in case user does not want to parse themselves.
+		//// MAY NOT NEED THIS, USE OUTPUT FROM MERGE AWS->GCP FUNCTION
+		////const arrayPseudoParsed = pseudoParseVAPI(parsableData.gcp)
+		////setTableData(arrayPseudoParsed)
+		//console.log("doing the merge now");
+		//const mergeOutput = mergeGCPWithTextract(parsableData)
+		//console.log(mergeOutput)
+		//setTableData(mergeOutput)
 
 	}
 
@@ -148,7 +158,10 @@ const Home = (props) => {
 					setTableData={setTableData}
 				/>
 				{ useCamera && 
-					<Camera record={true}/>
+					<Camera 
+						record={true}
+						loadGoogleVAPI={loadGoogleVAPI}
+					/>
 				}
 
 				<div>

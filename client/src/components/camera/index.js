@@ -44,9 +44,11 @@ const Camera = (props) => {
 						if (!canvasRef.current || !videoRef.current) return;
 						canvasRef.current.width = videoRef.current.videoWidth;
 						canvasRef.current.height = videoRef.current.videoHeight;
+						const file = videoRef.current
 						canvasRef.current.getContext("2d").drawImage(videoRef.current, 0, 0);
-						console.log('image: ', canvasRef.current.toDataURL("image/webp"));
+						console.log('image: ', canvasRef.current);
 						setPictureTaken(true);
+						props.loadGoogleVAPI(canvasRef.current.toDataURL())
 					}}
 				>✔</Button>
 				<Button onClick={() => setPictureTaken(false)}> ✖ </Button>
