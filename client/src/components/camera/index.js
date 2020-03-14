@@ -36,26 +36,27 @@ const Camera = (props) => {
 	}
 
 	return (
-		<div>
+		<div style={{
+			width: "80%",
+			height: "80%",
+		}}>
 			<div>
 				<Button 
 					id="camera--trigger" 
 					onClick={async () => {
 						if (!canvasRef.current || !videoRef.current) return;
+
 						canvasRef.current.width = videoRef.current.videoWidth;
 						canvasRef.current.height = videoRef.current.videoHeight;
 						canvasRef.current.getContext("2d").drawImage(videoRef.current, 0, 0);
-						console.log('image: ', canvasRef.current);
 						setPictureTaken(true);
 
-						const base64URL = atob(
-							canvasRef.current.toDataURL().replace("data:image/png;base64,","")
-						)
-
+						const base64URL = canvasRef.current.toDataURL()
 						const responseFetchURL = await fetch(base64URL);
-						const blobArray = response.blob()
+						const blobArray = await responseFetchURL.blob()
 						const file = new File([blobArray], "cool-img-bro.png", { type: "image/png" })
 						props.loadGoogleVAPI(file)
+
 					}}
 				>✔</Button>
 				<Button onClick={() => setPictureTaken(false)}> ✖ </Button>
@@ -65,6 +66,7 @@ const Camera = (props) => {
 				style={{
 					width: pictureTaken ? 0 : 1000, 
 					height: pictureTaken ? 0 : 1000, 
+					"object-fit": "cover"
 				}} 
 				id="camera--view" autoplay playsinline></video>
 			<canvas
@@ -72,6 +74,7 @@ const Camera = (props) => {
 				style={{
 					width: pictureTaken ? 1000 : 0, 
 					height: pictureTaken ? 1000 : 0, 
+					"object-fit": "cover",
 					border: "2px solid black"
 				}} 
 				ref={canvasRef}
