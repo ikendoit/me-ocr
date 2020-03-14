@@ -40,15 +40,22 @@ const Camera = (props) => {
 			<div>
 				<Button 
 					id="camera--trigger" 
-					onClick={() => {
+					onClick={async () => {
 						if (!canvasRef.current || !videoRef.current) return;
 						canvasRef.current.width = videoRef.current.videoWidth;
 						canvasRef.current.height = videoRef.current.videoHeight;
-						const file = videoRef.current
 						canvasRef.current.getContext("2d").drawImage(videoRef.current, 0, 0);
 						console.log('image: ', canvasRef.current);
 						setPictureTaken(true);
-						props.loadGoogleVAPI(canvasRef.current.toDataURL())
+
+						const base64URL = atob(
+							canvasRef.current.toDataURL().replace("data:image/png;base64,","")
+						)
+
+						const responseFetchURL = await fetch(base64URL);
+						const blobArray = response.blob()
+						const file = new File([blobArray], "cool-img-bro.png", { type: "image/png" })
+						props.loadGoogleVAPI(file)
 					}}
 				>✔</Button>
 				<Button onClick={() => setPictureTaken(false)}> ✖ </Button>
