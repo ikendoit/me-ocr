@@ -36,10 +36,7 @@ const Camera = (props) => {
 	}
 
 	return (
-		<div style={{
-			width: "80%",
-			height: "80%",
-		}}>
+		<div>
 			<div>
 				<Button 
 					id="camera--trigger" 
@@ -55,6 +52,7 @@ const Camera = (props) => {
 						const responseFetchURL = await fetch(base64URL);
 						const blobArray = await responseFetchURL.blob()
 						const file = new File([blobArray], "cool-img-bro.png", { type: "image/png" })
+						props.setUploadedFile(file)
 						props.loadGoogleVAPI(file)
 
 					}}
@@ -64,18 +62,13 @@ const Camera = (props) => {
 			<video 
 				ref={videoRef}
 				style={{
-					width: pictureTaken ? 0 : 1000, 
-					height: pictureTaken ? 0 : 1000, 
-					"object-fit": "cover"
+					width: pictureTaken ? 0 : "95%", 
 				}} 
 				id="camera--view" autoplay playsinline></video>
 			<canvas
 				id="camera--sensor"
 				style={{
-					width: pictureTaken ? 1000 : 0, 
-					height: pictureTaken ? 1000 : 0, 
-					"object-fit": "cover",
-					border: "2px solid black"
+					visibility: "hidden",
 				}} 
 				ref={canvasRef}
 			>Your browser does not support the HTML5 canvas tag.</canvas>

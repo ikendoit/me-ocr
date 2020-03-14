@@ -148,8 +148,7 @@ const Home = (props) => {
 			}
 
 			<div style={{
-				display: 'flex',
-				flexDirection: 'row'
+				width: '100%',
 			}}>
 				<Canvas 
 					imageFile={uploadedFile}
@@ -161,6 +160,7 @@ const Home = (props) => {
 					<Camera 
 						record={true}
 						loadGoogleVAPI={loadGoogleVAPI}
+						setUploadedFile={setUploadedFile}
 					/>
 				}
 
