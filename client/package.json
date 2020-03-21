@@ -8,6 +8,7 @@
     "start:production": "npm run -s serve",
     "start:development": "npm run -s dev",
     "build": "preact build --template src/template.html",
+    "np-build": "preact build --no-prerender --template src/template.html",
     "serve": "preact build --template src/template.html && serve build --single --template src/template.html",
     "dev": "preact watch --template src/template.html",
     "lint": "eslint src",

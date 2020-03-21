@@ -4,9 +4,28 @@
 /client/src/jsons/*.json
 /client/*.log
 /client/*.lock
+/client/.env
 
 /lambda/node_modules
 /lambda/build
 /lambda/credentials
 /lambda/source
 /lambda/config.json
+
+# dependencies
+/samson-ocr-client/node_modules
+/samson-ocr-client/.pnp
+/samson-ocr-client/.pnp.js
+# testing
+/samson-ocr-client/coverage
+# production
+/samson-ocr-client/build
+# misc
+/samson-ocr-client/.DS_Store
+/samson-ocr-client/.env.local
+/samson-ocr-client/.env.development.local
+/samson-ocr-client/.env.test.local
+/samson-ocr-client/.env.production.local
+/samson-ocr-client/npm-debug.log*
+/samson-ocr-client/yarn-debug.log*
+/samson-ocr-client/yarn-error.log*
