@@ -1,3 +1,0 @@
-AWS textract is not working well with rotated imagesssss
-
-We are augmenting camera with straight lines, so people know when an image is actually straight.
