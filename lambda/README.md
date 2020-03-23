@@ -1,31 +1,31 @@
 # Handwriting Image Lambda function, 
 
-<In Progress>
-
 Samson Hotel Project,
 For receivng image files, and parse into text blocks.
 
-## Set up:
+## DEV Set up:
 ```
 	<Add a /credentials directory, which contain the Google cloud JSON key>
 	npm install
-	./build.sh
-	<put on lambda function>
+	do dev
 ```
 
-## Tesing:
+## TEST The thing:
 ```
-  add /source directory, with all the images jpg files
-	change the code in index.js
-	node index.js
+	npm test
 ```
 
-## Local Dev:
-
-### First Set up
+## Run Local Lambda:
+Follow this: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-linux.html
 ```
-	Follow this: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-linux.html
-```
-
-## After Setting Up
 	npm start
+```
+
+## DEPLOY Perform:
+< configure aws creds in bashrc >
+< configure correct lambda function name in package.json -> deploy-script>
+```
+	npm run build
+	npm run deploy
+```
+
