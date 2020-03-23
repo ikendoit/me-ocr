@@ -12,6 +12,7 @@ For receivng image files, and parse into text blocks.
 
 ## TEST The thing:
 ```
+	npm start
 	npm test
 ```
 
