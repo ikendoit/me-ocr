@@ -21,7 +21,6 @@ const Camera = (props) => {
 		navigator.mediaDevices
 			.getUserMedia(constraints)
 			.then(function (stream) {
-				const track = stream.getTracks()[0];
 				videoRef.current.srcObject = stream;
 			})
 			.catch(function (error) {
@@ -49,14 +48,6 @@ const Camera = (props) => {
 	}, [videoRef, canvasRef, props.record])
 
 
-	const getVideoRefHeight = () => {
-		if (!videoRef || !videoRef.current) return 0
-		const rects = videoRef.current.getClientRects()
-		console.log(rects)
-		if (!rects || rects.length === 0) return 0
-		return rects[0].height
-	}
-	console.log(videoRef.current)
 	return (
 		<div style={{
 			display: props.record ? "block" : "none"
@@ -98,16 +89,16 @@ const Camera = (props) => {
 						left: 0
 					}}
 					id="camera--view" autoPlay playsInline></video>
-				<canvas
+				<div
+					id="grid-support"
 					style={{
 						width: pictureTaken ? 0 : "95%",
 						height: '50vh',
-						border: '2px solid blue',
 						position: "absolute",
 						top: 0,
-						left: 0
+						left: 0,
 					}}
-				>Your browser does not support the HTML5 canvas tag.</canvas>
+				></div>
 			</div>
 			<canvas
 				id="camera--sensor"
