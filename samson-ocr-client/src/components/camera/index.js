@@ -17,6 +17,7 @@ const Camera = (props) => {
 			console.log("not found ref, re-starting")
 			return;
 		}
+		// start the camera stream for video element
 		navigator.mediaDevices
 			.getUserMedia(constraints)
 			.then(function (stream) {
@@ -48,6 +49,14 @@ const Camera = (props) => {
 	}, [videoRef, canvasRef, props.record])
 
 
+	const getVideoRefHeight = () => {
+		if (!videoRef || !videoRef.current) return 0
+		const rects = videoRef.current.getClientRects()
+		console.log(rects)
+		if (!rects || rects.length === 0) return 0
+		return rects[0].height
+	}
+	console.log(videoRef.current)
 	return (
 		<div style={{
 			display: props.record ? "block" : "none"
@@ -74,12 +83,32 @@ const Camera = (props) => {
 				>✔</Button>
 				<Button onClick={() => setPictureTaken(false)}> ✖ </Button>
 			</div>
-			<video
-				ref={videoRef}
-				style={{
-					width: pictureTaken ? 0 : "95%",
-				}}
-				id="camera--view" autoPlay playsInline></video>
+			<div style={{
+				position: "relative",
+				width: '100%',
+				height: '100%'
+			}}>
+				<video
+					ref={videoRef}
+					style={{
+						width: pictureTaken ? 0 : "95%",
+						height: '50vh',
+						position: "absolute",
+						top: 0,
+						left: 0
+					}}
+					id="camera--view" autoPlay playsInline></video>
+				<canvas
+					style={{
+						width: pictureTaken ? 0 : "95%",
+						height: '50vh',
+						border: '2px solid blue',
+						position: "absolute",
+						top: 0,
+						left: 0
+					}}
+				>Your browser does not support the HTML5 canvas tag.</canvas>
+			</div>
 			<canvas
 				id="camera--sensor"
 				style={{

@@ -144,6 +144,8 @@ const Canvas = (props) => {
 				ref={canvasRef}
 				style={{
 					border: '1px solid #d3d3d3',
+					height: '100vh',
+					width: '100vw',
 				}}
 			>
 				Your browser does not support the HTML5 canvas tag.

@@ -1,13 +1,12 @@
 import React from 'react';
 import { useState } from 'react';
-import { input, Upload, message, Button, Icon } from 'antd';
+import { Button } from 'antd';
 import style from './style.css';
 import ImageCanvasProcessing from '../../components/canvas'
 import Camera from '../../components/camera'
-import ModeSelection from '../../components/mode-selection'
-import { simplifyGoogleVAPI, pseudoParseVAPI, mergeGCPWithTextract } from "../../utils/data-tools"
-import TableDisplay from '../../components/table-display'
-// import testData from "../../jsons/new-8.json"
+import ResultDisplay from '../../components/result-display'
+import { simplifyGoogleVAPI, mergeGCPWithTextract } from "../../utils/data-tools"
+import testData from "../../jsons/new-8.json"
 const {
 	REACT_APP_LAMBDA_FUNCTION,
 	REACT_APP_LAMBDA_API_KEY
@@ -21,16 +20,13 @@ const Home = (props) => {
 
 	let [uploadedFile, setUploadedFile] = useState(null);
 	const [currentMode, setCurrentMode] = useState('Ghi_Chu'); //TODO: user can create modes
-	const [parseMode, setParseMode] = useState('TABLE'); //TODO: user can create modes
 	const [rawOcrResult, setRawOcrResult] = useState([]);
 	const [tableData, setTableData] = useState([[]]);
 	const [useCamera, setUseCamera] = useState(false);
 
 	const onFileChange = event => {
 		const file = event.target.files[0];
-		// TODO: perform validation for img file validity HERE
 		setUploadedFile(file);
-		console.log("performing the file loader");
 		loadGoogleVAPI(file);
 	}
 
@@ -41,71 +37,62 @@ const Home = (props) => {
 	*/
 	const loadGoogleVAPI = async (file) => {
 
-		// variables
-		const bucket = 'samson-ocr-us-west-2';
-		const timeStamp = new Date().getTime();
-		const datetime = (new Date()).toISOString().slice(0, 10);
-		const randomNumber = parseInt(Math.random() * 18081).toString(); // random number prefix for epoch to ensure there's no collision when lambda reads from s3
+		// // variables
+		// const bucket = 'samson-ocr-us-west-2';
+		// const timeStamp = new Date().getTime();
+		// const datetime = (new Date()).toISOString().slice(0, 10);
+		// const randomNumber = parseInt(Math.random() * 18081).toString(); // random number prefix for epoch to ensure there's no collision when lambda reads from s3
 
-		// save to s3 bucket
-		let url = `http://${bucket}.s3.amazonaws.com/${datetime}/${randomNumber}${timeStamp}`;
-		const s3Upload = await fetch(url, {
-			method: "PUT",
-			headers: {
-				"x-amz-grant-full-control": "id=98ff39d827edc806f72b1268a96f607527818ee4f4007e2754cd9aba104b3980"
-			},
-			body: file
-		});
-		console.log(s3Upload)
+		// // save to s3 bucket
+		// let url = `http://${bucket}.s3.amazonaws.com/${datetime}/${randomNumber}${timeStamp}`;
+		// const s3Upload = await fetch(url, {
+		// 	method: "PUT",
+		// 	headers: {
+		// 		"x-amz-grant-full-control": "id=98ff39d827edc806f72b1268a96f607527818ee4f4007e2754cd9aba104b3980"
+		// 	},
+		// 	body: file
+		// });
+		// console.log(s3Upload)
 
-		// parse s3 files
-		let response = await fetch("http://192.168.1.76:8001/read", {
-			method: "POST",
-			body: JSON.stringify({
-				Bucket: bucket,
-				S3Path: `${datetime}/${randomNumber}${timeStamp}` //"2020-02-10/9551581300905669" -> fake path
-			})
-		});
-		let data = await response.text()
-		data = data.replace(/: None/g, ': null');
-		data = data.replace(/: False/g, ': false');
-		data = data.replace(/: True/g, ': true');
-		data = data.replace(/'/g, '"');
-		data = JSON.parse(data);
+		// // parse s3 files
+		// let response = await fetch("http://192.168.1.76:8001/read", {
+		// 	method: "POST",
+		// 	body: JSON.stringify({
+		// 		Bucket: bucket,
+		// 		S3Path: `${datetime}/${randomNumber}${timeStamp}` //"2020-02-10/9551581300905669" -> fake path
+		// 	})
+		// });
+		// let data = await response.text()
+		// data = data.replace(/: None/g, ': null');
+		// data = data.replace(/: False/g, ': false');
+		// data = data.replace(/: True/g, ': true');
+		// data = data.replace(/'/g, '"');
+		// data = JSON.parse(data);
 
+		// const parsableData = { gcp: {}, aws: {} }
+
+		// // register the aws and gcp data into object.
+		// parsableData.aws = data.aws;
+		// parsableData.gcp = simplifyGoogleVAPI(data.gcp);
+
+		// // set raw ocr of gcp on screen
+		// setRawOcrResult(parsableData.gcp);
+
+		// // display table result ( merge from textract and gcp ) in html table
+		// const mergeOutput = mergeGCPWithTextract(parsableData)
+		// setTableData(mergeOutput)
+
+
+		const fetchResult = testData;
 		const parsableData = { gcp: {}, aws: {} }
-
 		// register the aws and gcp data into object.
-		parsableData.aws = data.aws;
-		parsableData.gcp = simplifyGoogleVAPI(data.gcp);
-
-		// set raw ocr of gcp on screen
+		parsableData.aws = fetchResult.aws;
+		parsableData.gcp = simplifyGoogleVAPI(fetchResult.gcp);
+		// set the raw ocr result, so that we can pass into canvas view
 		setRawOcrResult(parsableData.gcp);
-
-		// display table result ( merge from textract and gcp ) in html table
+		// pre-parse the gcp vision, in case user does not want to parse themselves.
 		const mergeOutput = mergeGCPWithTextract(parsableData)
 		setTableData(mergeOutput)
-
-
-
-		//const fetchResult = testData;
-		//const parsableData = { gcp: {}, aws: {}}
-
-		//// register the aws and gcp data into object.
-		//parsableData.aws = fetchResult.aws;
-		//parsableData.gcp = simplifyGoogleVAPI(fetchResult.gcp);
-
-		//// set the raw ocr result, so that we can pass into canvas view
-		//setRawOcrResult(parsableData.gcp);
-
-		//// pre-parse the gcp vision, in case user does not want to parse themselves.
-		//// MAY NOT NEED THIS, USE OUTPUT FROM MERGE AWS->GCP FUNCTION
-		////const arrayPseudoParsed = pseudoParseVAPI(parsableData.gcp)
-		////setTableData(arrayPseudoParsed)
-		//console.log("doing the merge now");
-		//const mergeOutput = mergeGCPWithTextract(parsableData)
-		//console.log(mergeOutput)
-		//setTableData(mergeOutput)
 
 	}
 
@@ -140,22 +127,24 @@ const Home = (props) => {
 	return (
 		<div className={style.home}>
 
-			<h1>{parseMode === "TABLE" ? "Excel" : "Text"} Generator</h1>
-
 			<input
 				type="file"
 				onChange={onFileChange}
 			/>
-
 			<Button onClick={() => setUseCamera(!useCamera)}> 📷 </Button>
-			{ /* <ModeSelection setMode={setCurrentMode} setParseMode={setParseMode} mode={currentMode} /> */
-			}
 
-			<div style={{
-				width: '100%',
-			}}>
+			<ResultDisplay
+				rawOcrResult={rawOcrResult}
+				tableData={tableData}
+			/>
+
+			<div
+				style={{
+					width: '100%',
+				}}>
 				{uploadedFile &&
 					<ImageCanvasProcessing
+						id={"ImageDisplay"}
 						imageFile={uploadedFile}
 						lineHighlight={currentMode}
 						rawOcrResult={rawOcrResult}
@@ -163,15 +152,12 @@ const Home = (props) => {
 					/>
 				}
 				<Camera
+					id={"PictureTaker"}
 					record={useCamera}
 					loadGoogleVAPI={loadGoogleVAPI}
 					setUploadedFile={setUploadedFile}
 				/>
 
-				<div>
-					{parseMode === "TABLE" && <TableDisplay table={tableData} />}
-					{parseMode === "TEXT" && tableData[0][0] != null && tableData[0][0].split("\n").map(e => <p> {e} </p>)}
-				</div>
 			</div>
 
 		</div>
