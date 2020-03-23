@@ -58,7 +58,7 @@ const Home = (props) => {
 		let response = await fetch(REACT_APP_LAMBDA_FUNCTION, {
 			method: "POST",
 			headers: {
-				"x-api-key": REACT_APP_LAMBDA_API_KEY
+				"X-Api-Key": REACT_APP_LAMBDA_API_KEY
 			},
 			body: JSON.stringify({
 				Bucket: bucket,

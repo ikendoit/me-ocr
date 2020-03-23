@@ -8,8 +8,8 @@ const {
 const headersApi = {
 	"Access-Control-Allow-Headers": 
 			"Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token",
-	"Access-Control-Allow-Methods": "HEAD,OPTIONS,POST",
-	"Access-Control-Allow-Origin": "*",
+	"Access-Control-Allow-Methods": "*",
+	"Access-Control-Allow-Origin": "http://localhost:3000,http://localhost:8080",
 }
 // MAIN
 exports.handler = async (event, ctx, callback) => {
