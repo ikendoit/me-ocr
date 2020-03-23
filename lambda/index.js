@@ -16,7 +16,11 @@ exports.handler = async (event, ctx, callback) => {
 
 	try {
 
-		const body = JSON.parse(event.body);
+		console.log(JSON.stringify(event.body), typeof event.body)
+		let body = event.body
+		if (typeof event.body === "string") {
+			body = JSON.parse(event.body);
+		}
 
 		// check request validity
 		if (!body.Bucket || !body.S3Path) {
