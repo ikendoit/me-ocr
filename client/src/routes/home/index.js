@@ -1,4 +1,4 @@
-import { h } from 'preact';
+import { h } from 'react';
 import { useState } from 'preact/hooks';
 import { input, Upload, message, Button, Icon  } from 'antd';
 import style from './style';

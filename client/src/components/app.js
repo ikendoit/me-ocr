@@ -1,5 +1,4 @@
-import { hot } from 'react-hot-loader/babel';
-import { h, Component } from 'preact';
+import { h, Component } from 'react';
 import { Router } from 'preact-router';
 
 import Header from './header';

@@ -1,5 +1,6 @@
-import { h, Component } from 'react';
-import style from './style';
+import React from 'react';
+import { Component } from 'react';
+import style from './style.css';
 
 export default class Profile extends Component {
 	state = {
@@ -30,7 +31,7 @@ export default class Profile extends Component {
 	// Note: `user` comes from the URL, courtesy of our router
 	render({ user }, { time, count }) {
 		return (
-			<div class={style.profile}>
+			<div className={style.profile}>
 				<h1>Profile: {user}</h1>
 				<p>This is the user profile for a user named { user }.</p>
 

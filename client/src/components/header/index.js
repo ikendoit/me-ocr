@@ -1,4 +1,4 @@
-import { h } from 'preact';
+import { h } from 'react';
 import { Link } from 'preact-router/match';
 import style from './style.css';
 
