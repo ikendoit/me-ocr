@@ -6,4 +6,4 @@ source /home/ken/.bashrc
 npm run build && aws s3 sync build/ s3://samson-ocr-web --delete
 
 # invalidate cloudfront distribution
-#aws cloudfront create-invalidation --distribution-id=E397LJ178VB74Y --paths "/*"
+aws cloudfront create-invalidation --distribution-id=E397LJ178VB74Y --paths "/*"
