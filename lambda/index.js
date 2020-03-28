@@ -8,15 +8,14 @@ const {
 const headersApi = {
 	"Access-Control-Allow-Headers": 
 			"Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token",
-	"Access-Control-Allow-Methods": "*",
-	"Access-Control-Allow-Origin": "http://localhost:3000,http://localhost:8080",
+	"Access-Control-Allow-Methods": "OPTIONS,POST,GET",
+	"Access-Control-Allow-Origin": "*",
 }
 // MAIN
 exports.handler = async (event, ctx, callback) => {
 
 	try {
 
-		console.log(JSON.stringify(event.body), typeof event.body)
 		let body = event.body
 		if (typeof event.body === "string") {
 			body = JSON.parse(event.body);
@@ -37,14 +36,15 @@ exports.handler = async (event, ctx, callback) => {
 			parseS3File(body.S3Path, body.Bucket)
 		]);
 
+		console.log("responding back to client 200")
 		// response to client 
 		callback(null, {
 			statusCode: 200,
 			headers: headersApi,
-			body: {
+			body: JSON.stringify({
 				gcp: gcpTextAnnotation,
 				aws: awsTextAnnotation
-			}
+			})
 		})
 
 		return {
@@ -53,7 +53,7 @@ exports.handler = async (event, ctx, callback) => {
 		};
 
 	} catch(err) {
-		console.log(err, event.body);
+		console.log("ERROR:", err, event.body);
 		callback(null, {
 			code: 400, 
 			headers: headersApi,
