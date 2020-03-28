@@ -21,7 +21,8 @@
     "eject": "react-scripts eject",
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
-    "test": "react-app-rewired test"
+    "test": "react-app-rewired test",
+    "deploy": "./deploy.sh"
   },
   "eslintConfig": {
     "extends": "react-app"

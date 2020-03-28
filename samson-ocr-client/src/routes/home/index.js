@@ -44,7 +44,7 @@ const Home = (props) => {
 		const randomNumber = parseInt(Math.random() * 18081).toString(); // random number prefix for epoch to ensure there's no collision when lambda reads from s3
 
 		// save to s3 bucket
-		let url = `http://${bucket}.s3.amazonaws.com/${datetime}/${randomNumber}${timeStamp}`;
+		let url = `https://d2733le06a6kyc.cloudfront.net/${datetime}/${randomNumber}${timeStamp}`;
 		const s3Upload = await fetch(url, {
 			method: "PUT",
 			headers: {
@@ -66,10 +66,10 @@ const Home = (props) => {
 			})
 		});
 		let data = await response.text()
-		data = data.replace(/: None/g, ': null');
-		data = data.replace(/: False/g, ': false');
-		data = data.replace(/: True/g, ': true');
-		data = data.replace(/'/g, '"');
+		// data = data.replace(/: None/g, ': null');
+		// data = data.replace(/: False/g, ': false');
+		// data = data.replace(/: True/g, ': true');
+		// data = data.replace(/'/g, '"');
 		data = JSON.parse(data);
 
 		const parsableData = { gcp: {}, aws: {} }
