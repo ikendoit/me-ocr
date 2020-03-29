@@ -21,10 +21,12 @@ const TableDisplay = (props) => {
 			allRows.push(currentRow);
 		}
 
-		const currentTable = (<table style={{
-			border: '1px solid #ddd',
-			padding: 2
-		}}>{allRows}
+		const currentTable = (<table 
+      id="table-display"
+      style={{
+        border: '1px solid #ddd',
+        padding: 2
+      }}>{allRows}
 		</table>
 		)
 

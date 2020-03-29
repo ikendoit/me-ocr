@@ -9,7 +9,7 @@ const Camera = (props) => {
 	const [pictureTaken, setPictureTaken] = useState(false);
 
 	// Set constraints for the video stream
-	const constraints = { video: { facingMode: "user" }, audio: false };
+	const constraints = { video: { facingMode: "environment" }, audio: false };
 
 	// Access the device camera and stream to cameraView
 	function cameraStart() {
