@@ -1,4 +1,3 @@
-import React from 'react';
 /*
   params:
     currentLine: [ [x,y], [x,y].. ]
@@ -31,8 +30,6 @@ export const drawLine = (currentLine, lineHighlight, canvasRefObj) => {
 */
 export const drawWordBlocks = (simplifiedGoogleVAPI, canvasRefObj) => {
   const ctx = canvasRefObj.getContext('2d');
-  const hostWidth = canvasRefObj.width;
-  const hostHeight = canvasRefObj.height;
 
   for (let paragraph of simplifiedGoogleVAPI) {
     for (let word of paragraph.words) {

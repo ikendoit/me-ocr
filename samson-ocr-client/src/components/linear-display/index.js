@@ -60,11 +60,13 @@ const LinearDisplay = (props) => {
 	if (!props.rawOcrResult) return <div />
 
 	return (
-		<span style={{
-			display: 'inline',
-			width: '95%',
-			marginLeft: '3%'
-		}}>
+		<span 
+			id="linear-display-result"
+			style={{
+				display: 'inline',
+				width: '95%',
+				marginLeft: '3%'
+			}}>
 			{generateLines()}
 		</span>
 	)

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button } from "antd"
+import { Modal, Button, message } from "antd"
 import TableDisplay from '../table-display'
 import LinearDisplay from '../linear-display'
 import { TableOutlined, UnorderedListOutlined } from '@ant-design/icons';
@@ -52,6 +52,30 @@ const ResultDisplay = (props) => {
 		document.body.removeChild(link);
 	}
 
+	const copyToClipBoard = () => {
+		const containerId = "linear-display-result"
+
+		try {
+			if (document.selection) { 
+				const range = document.body.createTextRange();
+				range.moveToElementText(document.getElementById(containerId));
+				range.select().createTextRange();
+				document.execCommand("copy"); 
+
+			} else if (window.getSelection) {
+				const range = document.createRange();
+				range.selectNode(document.getElementById(containerId));
+				window.getSelection().addRange(range);
+				document.execCommand("copy");
+
+			}
+			message.success("Copied To Clipboard")
+		} catch(err) {
+			message.error("Error copying, please try again")
+			console.log(err);
+		}
+	}
+
 	return (
 		<div>
 			<div id="Table Display" >
@@ -92,7 +116,12 @@ const ResultDisplay = (props) => {
 					shape="circle" icon={<UnorderedListOutlined />}
 				/>
 				<Modal
-					title="Result Text"
+					title={(
+						<span>
+							Result Text {"  "}    
+							<Button onClick={copyToClipBoard}> Copy </Button>
+						</span>
+					)}
 					visible={visibleText}
 					footer={null}
 					onCancel={handleCancelText}

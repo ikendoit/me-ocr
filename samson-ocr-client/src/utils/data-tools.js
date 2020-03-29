@@ -158,7 +158,6 @@ const parseLinesIntoText = (lines) => {
 	return [ [ primitive-type ] ]
 */
 const parseLinesIntoColumns = (lines, columnNumber) => {
-	let result = [];
 	for (let line of lines) {
 		// sort the lines by x value first.
 		line.blocks.sort((x, y) => x.wordCoordinate[0][0] > y.wordCoordinate[0][0] ? 1 : -1)
