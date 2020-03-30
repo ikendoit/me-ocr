@@ -31,3 +31,4 @@
 /samson-ocr-client/yarn-debug.log*
 /samson-ocr-client/yarn-error.log*
 /samson-ocr-client/.env
+/samson-ocr-client/src/jsons/*

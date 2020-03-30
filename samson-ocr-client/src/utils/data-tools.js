@@ -70,6 +70,57 @@ const convertVerticesTo2DPolygon = (vertices) => {
 }
 
 /*
+	@param: gcp: [{
+		paragraphCoordinate: [ [x,y]x5 ],
+		words: [ {
+			wordCoordinate : [ [x,y]x5 ] TOP_LEFT -> TOP_RIGHT -> BOT_RIGHT -> BOT_LEFT -> TOP_LEFT
+			value
+		} ]
+	}]
+
+	return: [][]string: table data from gcp result
+*/
+export const detectTableGcpAdHoc = (gcp) => {
+	/* 
+		output: allWords: [ {
+			minX, minY, value
+		} ]
+	*/
+	const allWords = gcp.reduce( (master, paragraph) => {
+		return master.concat(
+			paragraph.words.map( word => ({ value: word.value, minX: word.wordCoordinate[0][0], minY: word.wordCoordinate[0][1]}) )
+		)
+	}, [])
+
+	const typicalWordHeight = gcp[0].words[0].wordCoordinate[2][1] - gcp[0].words[0].wordCoordinate[0][1]
+	const typicalCharacterWidth = (
+			gcp[0].words[0].wordCoordinate[2][0] - gcp[0].words[0].wordCoordinate[0][0] 
+		) / gcp[0].words[0].value.length
+	console.log(typicalWordHeight, typicalCharacterWidth)
+
+	/* 
+		Create a lookup map: { lineIndex => [ minXYWord ] } 
+		Then, get the longest line, analyze the words => get the possible table barriers 
+		use that table bariers as columnIndex => separate lines by that.
+	*/
+
+	// 1. Create lookup map
+	const lineIndexMapping = allWords.reduce( (master, minXYWord) => {
+		const lineIndex = parseInt(minXYWord.minY / typicalWordHeight)
+		if (!master[lineIndex]) master[lineIndex] = [];
+		master[lineIndex].push(minXYWord)
+		return master;
+	}, {})
+
+	// 2. get longest line from lookup map
+	const sortedLines = Object.values(lineIndexMapping).sort( (a, b) => a.length > b.length ? -1 : 1 )
+	const maxLine = sortedLines[0]
+	console.log(maxLine)
+	
+
+}
+
+/*
 	param: wordBlockGroups: {
 		<group_name>: [
 			coordinate: [ [x,y] x 4 ]
